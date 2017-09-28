@@ -1,10 +1,16 @@
 #from https://gist.github.com/octocat/9257657
 
+*.DS_Store
+
+#exclude generated session.txt
+session.txt
+
 # Terraform state files to skip #
 ######
 *.tfstate
+*.tfstate.*.backup
 *.tfstate.backup
-*.terraform/
+.terraform/
 
 # Compiled source #
 ###################
@@ -37,7 +43,6 @@
 # OS generated files #
 ######################
 .DS_Store
-.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
