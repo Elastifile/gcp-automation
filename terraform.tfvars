@@ -1,4 +1,7 @@
 DISKTYPE = "local"
 NUM_OF_VMS = "3"
 NUM_OF_DISKS = "1"
-cluster_name = "ecfsterraform"
+CLUSTER_NAME = "elastifile-demo"
+ZONE = "us-central1-a"
+PROJECT = "elastifile-sa"
+IMAGE = "emanage-2-1-0-10-e0090fefba5b"

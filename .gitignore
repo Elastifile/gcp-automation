@@ -2,6 +2,9 @@
 
 *.DS_Store
 
+#exclude password file
+password.txt
+
 #exclude generated session.txt
 session.txt
 
