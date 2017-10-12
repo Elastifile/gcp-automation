@@ -78,7 +78,7 @@ function first_run {
   #wait 90 seconds for EMS to complete loading
   echo -e "Wait for EMS init.. \n"
   i=0
-  while [ "$i" -lt 7 ]; do
+  while [ "$i" -lt 9 ]; do
     sleep 10
     echo -e "Still waiting for EMS init.. \n"
     let i+=1
@@ -127,12 +127,16 @@ function create_instances {
 # Function to check running job status
 function job_status {
   while true; do
-    STATUS=`curl -s -b $SESSION_FILE --request GET --url "http://$EMS_ADDRESS/api/control_tasks/recent?task_type=$1" | grep status | cut -d \, -f 7 | cut -d \" -f 4`
+    STATUS=`curl -s -b $SESSION_FILE --request GET --url "http://$EMS_ADDRESS/api/control_tasks/recent?task_type=$1" | grep status | cut -d , -f 7 | cut -d \" -f 4`
     echo -e  "$1: in progress.. \n"
     if [[ $STATUS == "success" ]]; then
       echo -e "$1 Complete! \n"
       sleep 5
       break
+    fi
+    if [[ $STATUS == "error" ]]; then
+      echo -e "$1 Failed. Exiting.. \n"
+      exit 1
     fi
     sleep 10
   done
