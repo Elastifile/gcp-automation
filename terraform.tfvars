@@ -1,5 +1,5 @@
 DISKTYPE = "local"
-NUM_OF_VMS = "1"
+NUM_OF_VMS = "3"
 NUM_OF_DISKS = "1"
 CLUSTER_NAME = "elastifile-demo"
 ZONE = "us-central1-a"

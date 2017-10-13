@@ -69,25 +69,25 @@ echo "NUM_OF_DISKS: $NUM_OF_DISKS"
 
 #establish http session
 function establish_session {
-echo -e "Establish http session \n"
+echo -e "Establishing http session.."
 curl -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' http://$EMS_ADDRESS/api/sessions &>/dev/null
 }
 
 # Login, accept EULA, and set password
 function first_run {
   #wait 90 seconds for EMS to complete loading
-  echo -e "Wait for EMS init.. \n"
+  echo -e "Wait for EMS init..."
   i=0
   while [ "$i" -lt 9 ]; do
     sleep 10
-    echo -e "Still waiting for EMS init.. \n"
+    echo -e "Still waiting for EMS init..."
     let i+=1
   done
   establish_session "changeme"
-  echo -e "Accept EULA. \n"
+  echo -e "Accepting EULA.. "
   curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' http://$EMS_ADDRESS/api/systems/1/accept_eula &>/dev/null
 
-  echo -e "Update password \n"
+  echo -e "Updating password..."
   #change the password
   curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' http://$EMS_ADDRESS/api/users/1 &>/dev/null
 }
@@ -96,20 +96,20 @@ function first_run {
 
 function set_storage_type {
   if [[ $1 == "local" ]]; then
-    echo -e "Setting storage type: $1, num of disks: $2 \n"
+    echo -e "Setting storage type: $1, num of disks: $2"
     curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","local_num_of_disks":"'$NUM_OF_DISKS'","local_disk_size":{"gigabytes":375}}' http://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
   elif [[ $1 == "persistent" ]]; then
-    echo -e "Setting storage type: $1, num of disks: $2 \n"
+    echo -e "Setting storage type: $1, num of disks: $2"
     curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","persistent_num_of_disks":'$NUM_OF_DISKS',"persistent_disk_size":{"gigabytes":2000}}' http://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
   fi
 }
 
 function setup_ems {
-  echo -e  "Establish http session using PASSWORD... \n"
+  echo -e  "Establish http session using PASSWORD..."
   establish_session $PASSWORD
 
   #configure EMS
-  echo -e "Configure EMS.. \n"
+  echo -e "Configure EMS..."
   curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' http://$EMS_ADDRESS/api/systems/1 &>/dev/null
 
   set_storage_type $DISKTYPE $NUM_OF_DISKS
@@ -120,7 +120,7 @@ function setup_ems {
 
 # Kickoff a create vhead instances job
 function create_instances {
-  echo -e "Creating $NUM_OF_VMS ECFS instances\n"
+  echo -e "Creating $NUM_OF_VMS ECFS instances"
   curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true}' http://$EMS_ADDRESS/api/hosts/create_instances &>/dev/null
 }
 
@@ -128,14 +128,14 @@ function create_instances {
 function job_status {
   while true; do
     STATUS=`curl -s -b $SESSION_FILE --request GET --url "http://$EMS_ADDRESS/api/control_tasks/recent?task_type=$1" | grep status | cut -d , -f 7 | cut -d \" -f 4`
-    echo -e  "$1: in progress.. \n"
+    echo -e  "$1: in progress.. "
     if [[ $STATUS == "success" ]]; then
       echo -e "$1 Complete! \n"
       sleep 5
       break
     fi
     if [[ $STATUS == "error" ]]; then
-      echo -e "$1 Failed. Exiting.. \n"
+      echo -e "$1 Failed. Exiting.."
       exit 1
     fi
     sleep 10
