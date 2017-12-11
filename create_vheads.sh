@@ -23,7 +23,7 @@ E_O_F
 #variables
 #LOGIN=admin
 SESSION_FILE=session.txt
-PASSWORD=`cat password.txt`
+PASSWORD="changed_me"
 SETUP_COMPLETE="false"
 DISKTYPE=local
 NUM_OF_VMS=3
@@ -144,8 +144,16 @@ function job_status {
 
 # Create data container & 200GB NFS export /my_fs0/
 function create_data_container {
-  echo -e "Create data container & 200GB NFS export /my_fs0/"
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"fs_0","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":65534,"gid":65534,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' http://$EMS_ADDRESS/api/data_containers &>/dev/null
+  echo -e "Create data container & 200GB NFS export /my_fs0/root"
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"fs_0","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' http://$EMS_ADDRESS/api/data_containers &>/dev/null
+  echo -e "Create export dir /my_fs0/src"
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":1,"path":"src","uid":0,"gid":0,"permissions":"755"}' http://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"src","path":"src","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' http://$EMS_ADDRESS/api/exports &>/dev/null
+  echo -e "Create export dir /my_fs0/target"
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":2,"path":"target","uid":0,"gid":0,"permissions":"755"}' http://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"target","path":"target","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' http://$EMS_ADDRESS/api/exports &>/dev/null
+  echo -e "Create data container & 200GB NFS export /GCP_active/root"
+  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"GCP_active","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' http://$EMS_ADDRESS/api/data_containers &>/dev/null
 }
 
 # Provision  and deploy
