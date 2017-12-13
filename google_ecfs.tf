@@ -28,7 +28,7 @@ variable "PROJECT"{
 }
 
 provider "google" {
-  credentials = "${file("andrew-sa-elastifile-sa.json")}"
+//  credentials = "${file("andrew-sa-elastifile-sa.json")}"
   project     = "${var.PROJECT}"
   region      = "${var.ZONE}"
 }
