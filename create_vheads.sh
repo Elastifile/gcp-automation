@@ -23,7 +23,7 @@ E_O_F
 #variables
 #LOGIN=admin
 SESSION_FILE=session.txt
-PASSWORD="changed_me"
+PASSWORD=`cat password.txt | cut -d " " -f 1`
 SETUP_COMPLETE="false"
 DISKTYPE=local
 NUM_OF_VMS=3
@@ -121,7 +121,7 @@ function setup_ems {
 # Kickoff a create vhead instances job
 function create_instances {
   echo -e "Creating $NUM_OF_VMS ECFS instances"
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true}' http://$EMS_ADDRESS/api/hosts/create_instances &>/dev/null
+  curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true}' http://$EMS_ADDRESS/api/hosts/create_instances
 }
 
 # Function to check running job status
