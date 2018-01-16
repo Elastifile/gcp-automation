@@ -24,11 +24,14 @@ variable "ZONE"{
   default = "us-central1-a"
 }
 variable "PROJECT"{
-  default = "elastifile-sa"
+}
+variable "CREDENTIALS"{
+}
+variable "SERVICE_EMAIL"{
 }
 
 provider "google" {
-//  credentials = "${file("andrew-sa-elastifile-sa.json")}"
+  credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
   region      = "${var.ZONE}"
 }
@@ -38,16 +41,12 @@ resource "google_compute_instance" "Elastifile" {
   machine_type = "n1-standard-2"
   zone         = "${var.ZONE}"
 
-  tags = ["http-server"]
+  tags = ["https-server"]
 
   boot_disk {
     initialize_params {
       image = "projects/elastifile-ci/global/images/${var.IMAGE}"
     }
-  }
-
-  // Local SSD disk
-  scratch_disk {
   }
 
   network_interface {
@@ -59,6 +58,7 @@ resource "google_compute_instance" "Elastifile" {
   }
 
   metadata {
+    ecfs_ems = "true"
     reference_name = "${var.CLUSTER_NAME}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete = "${var.SETUP_COMPLETE}"
@@ -66,7 +66,9 @@ resource "google_compute_instance" "Elastifile" {
 
   metadata_startup_script = "echo hi > /test.txt"
 
+# specify the GCP project service account to use
   service_account {
+    email = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
   }
 

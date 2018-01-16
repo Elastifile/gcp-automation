@@ -8,6 +8,9 @@ password.txt
 #exclude generated session.txt
 session.txt
 
+#exclude json credentials
+*.json
+
 # Terraform state files to skip #
 ######
 *.tfstate

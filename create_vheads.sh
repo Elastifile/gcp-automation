@@ -1,5 +1,5 @@
 #/bin/bash
-#create vheads.sh, (c) Andrew Renz, Sept 2017
+#create vheads.sh, (c) Andrew Renz, Sept 2017, Jan 2018
 #Script to configure Elastifile EManage (EMS) Server, and deploy cluster of ECFS virtual controllers (vheads) in Google Compute Platform (GCE)
 #Requires terraform to determine EMS address and name (Set EMS_ADDRESS and EMS_NAME to use standalone)
 
@@ -70,7 +70,7 @@ echo "NUM_OF_DISKS: $NUM_OF_DISKS"
 #establish http session
 function establish_session {
 echo -e "Establishing http session.."
-curl -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' http://$EMS_ADDRESS/api/sessions &>/dev/null
+curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://$EMS_ADDRESS/api/sessions &>/dev/null
 }
 
 # Login, accept EULA, and set password
@@ -85,11 +85,11 @@ function first_run {
   done
   establish_session "changeme"
   echo -e "Accepting EULA.. "
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' http://$EMS_ADDRESS/api/systems/1/accept_eula &>/dev/null
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula &>/dev/null
 
   echo -e "Updating password..."
   #change the password
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' http://$EMS_ADDRESS/api/users/1 &>/dev/null
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 &>/dev/null
 }
 
 # Configure ECFS storage type
@@ -97,12 +97,13 @@ function first_run {
 function set_storage_type {
   if [[ $1 == "local" ]]; then
     echo -e "Setting storage type: $1, num of disks: $2"
-    curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","local_num_of_disks":"'$NUM_OF_DISKS'","local_disk_size":{"gigabytes":375}}' http://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","local_num_of_disks":"'$NUM_OF_DISKS'","local_disk_size":{"gigabytes":375}}' https://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
   elif [[ $1 == "persistent" ]]; then
     echo -e "Setting storage type: $1, num of disks: $2"
-    curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","persistent_num_of_disks":'$NUM_OF_DISKS',"persistent_disk_size":{"gigabytes":2000}}' http://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"storage_type":"'$DISKTYPE'","persistent_num_of_disks":'$NUM_OF_DISKS',"persistent_disk_size":{"gigabytes":2000}}' https://$EMS_ADDRESS/api/cloud_providers/1 &>/dev/null
   fi
 }
+#'{"storage_type":"'$DISKTYPE'","local_num_of_disks":"'$NUM_OF_DISKS'","local_disk_size":{"gigabytes":375}}'
 
 function setup_ems {
   echo -e  "Establish http session using PASSWORD..."
@@ -110,7 +111,7 @@ function setup_ems {
 
   #configure EMS
   echo -e "Configure EMS..."
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' http://$EMS_ADDRESS/api/systems/1 &>/dev/null
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' https://$EMS_ADDRESS/api/systems/1 &>/dev/null
 
   set_storage_type $DISKTYPE $NUM_OF_DISKS
 
@@ -121,13 +122,13 @@ function setup_ems {
 # Kickoff a create vhead instances job
 function create_instances {
   echo -e "Creating $NUM_OF_VMS ECFS instances"
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true}' http://$EMS_ADDRESS/api/hosts/create_instances
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true}' https://$EMS_ADDRESS/api/hosts/create_instances &>/dev/null
 }
 
 # Function to check running job status
 function job_status {
   while true; do
-    STATUS=`curl -s -b $SESSION_FILE --request GET --url "http://$EMS_ADDRESS/api/control_tasks/recent?task_type=$1" | grep status | cut -d , -f 7 | cut -d \" -f 4`
+    STATUS=`curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/control_tasks/recent?task_type=$1" | grep status | cut -d , -f 7 | cut -d \" -f 4`
     echo -e  "$1: in progress.. "
     if [[ $STATUS == "success" ]]; then
       echo -e "$1 Complete! \n"
@@ -145,15 +146,18 @@ function job_status {
 # Create data container & 200GB NFS export /my_fs0/
 function create_data_container {
   echo -e "Create data container & 200GB NFS export /my_fs0/root"
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"fs_0","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' http://$EMS_ADDRESS/api/data_containers &>/dev/null
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"fs_0","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' https://$EMS_ADDRESS/api/data_containers &>/dev/null
   echo -e "Create export dir /my_fs0/src"
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":1,"path":"src","uid":0,"gid":0,"permissions":"755"}' http://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"src","path":"src","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' http://$EMS_ADDRESS/api/exports &>/dev/null
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":1,"path":"src","uid":0,"gid":0,"permissions":"755"}' https://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"src","path":"src","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' https://$EMS_ADDRESS/api/exports &>/dev/null
   echo -e "Create export dir /my_fs0/target"
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":2,"path":"target","uid":0,"gid":0,"permissions":"755"}' http://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"target","path":"target","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' http://$EMS_ADDRESS/api/exports &>/dev/null
-  echo -e "Create data container & 200GB NFS export /GCP_active/root"
-  curl -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"GCP_active","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' http://$EMS_ADDRESS/api/data_containers &>/dev/null
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"id":2,"path":"target","uid":0,"gid":0,"permissions":"755"}' https://$EMS_ADDRESS/api/data_containers/1/create_dir &>/dev/null
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"target","path":"target","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose","data_container_id":1}' https://$EMS_ADDRESS/api/exports &>/dev/null
+  echo -e "Create data container & 200GB NFS export /DC01/root"
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"DC01","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' https://$EMS_ADDRESS/api/data_containers &>/dev/null
+  echo -e "Create data container & 200GB NFS export /DC02/root"
+  curl -k -b session.txt -H "Content-Type: application/json" -X POST -d '{"name":"DC01","dedup":0,"compression":1,"soft_quota":{"bytes":200000000000},"hard_quota":{"bytes":200000000000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' https://$EMS_ADDRESS/api/data_containers &>/dev/null
+
 }
 
 # Provision  and deploy
@@ -164,7 +168,7 @@ function add_capacity {
   #Deploy cluster
   #read -p "Press any key to continue Cluster deployment... " -n1 -s
   echo "Start cluster deployment"
-  curl -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"auto_start":true}' http://$EMS_ADDRESS/api/systems/1/setup &>/dev/null &
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"auto_start":true}' https://$EMS_ADDRESS/api/systems/1/setup &>/dev/null 
   job_status activate_emanage_job
 }
 
