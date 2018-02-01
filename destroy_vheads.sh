@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # destoy_vheads.sh, Andrew Renz, Oct 10 2017
 # bash script to query and delete multiple GCE instances simultaneously
 

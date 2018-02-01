@@ -36,7 +36,7 @@ provider "google" {
   region      = "${var.ZONE}"
 }
 
-resource "google_compute_instance" "Elastifile" {
+resource "google_compute_instance" "Elastifile-ECFS" {
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-2"
   zone         = "${var.ZONE}"
@@ -81,7 +81,7 @@ resource "null_resource" "create_cluster" {
 
   }
 
-  depends_on = ["google_compute_instance.Elastifile"]
+  depends_on = ["google_compute_instance.Elastifile-ECFS"]
 
   provisioner "local-exec" {
     when = "destroy"

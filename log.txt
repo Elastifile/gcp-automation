@@ -1,0 +1,5 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   522    0   437  100    85   1977    384 --:--:-- --:--:-- --:--:--  1986
+)]}',
+{"id":1,"project":"elastifile-sa","image":"vhead-2-5-1-10-142ee106f93b","image_project":"Elastifile-CI","zone":"us-west1-a","region":"us","storage_type":"local","local_num_of_disks":1,"local_disk_size":{"gigabytes":375},"local_instance_type":"custom-20-131072","persistent_num_of_disks":5,"persistent_disk_size":{"gigabytes":2000},"persistent_instance_type":"custom-20-131072","aws_access_key_id":null,"aws_secret_access_key":null}
