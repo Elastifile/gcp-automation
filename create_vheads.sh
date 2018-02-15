@@ -86,13 +86,16 @@ function first_run {
     echo -e "Still waiting for EMS init...\n" | tee -a $LOG
     let i+=1
   done
-  establish_session "changeme"
+  echo -e "\nEstablishing session..\n" | tee -a $LOG
+  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions
   echo -e "\nAccepting EULA.. \n" | tee -a $LOG
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> $LOG 2>&1
 
   echo -e "\nUpdating password...\n" | tee -a $LOG
   #change the password
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> $LOG 2>&1
+
+
 }
 
 # Configure ECFS storage type
@@ -173,7 +176,7 @@ function deploy_cluster {
 
 # Provision  and deploy
 function add_capacity {
-  # establish_session $PASSWORD
+  establish_session $PASSWORD
   create_instances $NUM_OF_VMS
   job_status "create_instances_job"
   #Deploy cluster
