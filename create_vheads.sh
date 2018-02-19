@@ -81,7 +81,7 @@ function first_run {
   #wait 90 seconds for EMS to complete loading
   echo -e "Wait for EMS init...\n" | tee -a $LOG
   i=0
-  while [ "$i" -lt 7 ]; do
+  while [ "$i" -lt 10 ]; do
     sleep 10
     echo -e "Still waiting for EMS init...\n" | tee -a $LOG
     let i+=1
