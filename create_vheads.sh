@@ -81,13 +81,13 @@ function first_run {
   #wait 90 seconds for EMS to complete loading
   echo -e "Wait for EMS init...\n" | tee -a $LOG
   i=0
-  while [ "$i" -lt 10 ]; do
+  while [ "$i" -lt 12 ]; do
     sleep 10
     echo -e "Still waiting for EMS init...\n" | tee -a $LOG
     let i+=1
   done
   echo -e "\nEstablishing session..\n" | tee -a $LOG
-  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions
+  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions >> $LOG 2>&1
   echo -e "\nAccepting EULA.. \n" | tee -a $LOG
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> $LOG 2>&1
 

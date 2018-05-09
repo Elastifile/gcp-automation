@@ -38,7 +38,7 @@ provider "google" {
 
 resource "google_compute_instance" "Elastifile-ECFS" {
   name         = "${var.CLUSTER_NAME}"
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-4"
   zone         = "${var.ZONE}"
 
   tags = ["https-server"]
@@ -60,11 +60,14 @@ resource "google_compute_instance" "Elastifile-ECFS" {
   metadata {
     ecfs_ems = "true"
     reference_name = "${var.CLUSTER_NAME}"
+    version = "${var.IMAGE}"
+    disk_type = "${var.DISKTYPE}"
+    num_disks = "${var.NUM_OF_DISKS}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete = "${var.SETUP_COMPLETE}"
   }
 
-  metadata_startup_script = "echo hi > /test.txt"
+  metadata_startup_script = "echo ${var.IMAGE} > /ecfs_image.txt"
 
 # specify the GCP project service account to use
   service_account {
