@@ -23,6 +23,12 @@ variable "PASSWORD"{
 variable "ZONE"{
   default = "us-central1-a"
 }
+variable "NETWORK"{
+  default = "default"
+}
+variable "SUBNETWORK"{
+  default = "default"
+}
 variable "PROJECT"{
 }
 variable "CREDENTIALS"{
@@ -50,7 +56,8 @@ resource "google_compute_instance" "Elastifile-ECFS" {
   }
 
   network_interface {
-    network = "default"
+#    network = "${var.NETWORK}"
+    subnetwork = "${var.SUBNETWORK}"
 
     access_config {
       // Ephemeral IP
