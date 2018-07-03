@@ -74,6 +74,7 @@ resource "google_compute_instance" "Elastifile-ECFS" {
     ecfs_ems = "true"
     reference_name = "${var.CLUSTER_NAME}"
     version = "${var.IMAGE}"
+    template_type = "${var.TEMPLATE_TYPE}"
     disk_type = "${var.DISK_TYPE}"
     disk_config = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"

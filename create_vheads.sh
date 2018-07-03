@@ -80,27 +80,24 @@ echo -e "\nEstablishing https session..\n" | tee -a $LOG
 curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://$EMS_ADDRESS/api/sessions >> $LOG 2>&1
 }
 
-#curl -k -D session.txt -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changed_me"}}' https://$EMS_ADDRESS/api/sessions
-
-# Login, accept EULA, and set password
 function first_run {
-  #wait 90 seconds for EMS to complete loading
-  echo -e "Wait for EMS init...\n" | tee -a $LOG
-  i=0
-  while [ "$i" -lt 8 ]; do
-    sleep 10
-    echo -e "Still waiting for EMS init...\n" | tee -a $LOG
-    let i+=1
+  #wait for EMS to complete loading after instance creation
+  while true; do
+    emsresponse=`curl -k -s -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions | grep created_at | cut -d , -f 8 | cut -d \" -f 2`
+    echo -e "Waiting for EMS init...\n" | tee -a $LOG
+    if [[ $emsresponse == "created_at" ]]; then
+      echo -e "EMS now ready!\n" | tee -a $LOG
+      sleep 5
+      break
+    fi
+    sleep 5
   done
-  echo -e "\nEstablishing session..\n" | tee -a $LOG
-  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions >> $LOG 2>&1
-  echo -e "\nAccepting EULA.. \n" | tee -a $LOG
+  #accept EULA
+  echo -e "Accepting EULA.. \n" | tee -a $LOG
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> $LOG 2>&1
-
-  echo -e "\nUpdating password...\n" | tee -a $LOG
-  #change the password
+  echo -e "Updating password...\n" | tee -a $LOG
+  #update ems password
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> $LOG 2>&1
-
 }
 
 # Configure ECFS storage type
