@@ -81,7 +81,7 @@ curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user"
 }
 
 function first_run {
-  #wait for EMS to complete loading after instance creation
+  #loop function to wait for EMS to complete loading after instance creation
   while true; do
     emsresponse=`curl -k -s -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions | grep created_at | cut -d , -f 8 | cut -d \" -f 2`
     echo -e "Waiting for EMS init...\n" | tee -a $LOG
@@ -122,8 +122,8 @@ function set_storage_type_custom {
     cpu_cores=`echo $3 | cut -d "_" -f 1`
     ram=`echo $3 | cut -d "_" -f 2`
     echo -e "Setting custom storage type: $type, num of disks: $disks, disk size=$disk_size cpu cores: $cpu_cores, ram: $ram \n" | tee -a $LOG
-    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"name":"custom","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations
-    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":5}' https://$EMS_ADDRESS/api/cloud_providers/1
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"name":"custom","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations >> $LOG 2>&1
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":5}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
 }
 
 function setup_ems {
