@@ -1,11 +1,17 @@
-variable "DISKTYPE"{
-  default = "local"
+variable "DISK_TYPE"{
+  default = "persistent"
+}
+variable "TEMPLATE_TYPE"{
+  default = "medium"
+}
+variable "VM_CONFIG"{
+  default = "4_42"
 }
 variable "NUM_OF_VMS"{
   default = "3"
 }
-variable "NUM_OF_DISKS"{
-  default = "1"
+variable "DISK_CONFIG"{
+  default = "5_2000"
 }
 variable "CLUSTER_NAME"{
 }
@@ -68,8 +74,9 @@ resource "google_compute_instance" "Elastifile-ECFS" {
     ecfs_ems = "true"
     reference_name = "${var.CLUSTER_NAME}"
     version = "${var.IMAGE}"
-    disk_type = "${var.DISKTYPE}"
-    num_disks = "${var.NUM_OF_DISKS}"
+    template_type = "${var.TEMPLATE_TYPE}"
+    disk_type = "${var.DISK_TYPE}"
+    disk_config = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete = "${var.SETUP_COMPLETE}"
   }
@@ -86,7 +93,7 @@ resource "google_compute_instance" "Elastifile-ECFS" {
 
 resource "null_resource" "create_cluster" {
   provisioner "local-exec" {
-    command = "./create_vheads.sh -t ${var.DISKTYPE} -n ${var.NUM_OF_VMS} -m ${var.NUM_OF_DISKS}"
+    command = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG}"
     interpreter = ["/bin/bash","-c"]
 
   }

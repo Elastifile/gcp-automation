@@ -8,9 +8,11 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 ## Use:
 1. Create password.txt file with a password to use for eManage  (.gitignore skips this file)
 2. Specify configuration variables in terraform.tfvars:
+- TEMPLATE_TYPE = small, medium, standard, custom
 - NUM_OF_VMS = Number of ECFS virtual controllers, 3 minimum
-- DISKTYPE = "persistent" or "local"
-- NUM_OF_DISKS = Number of disks per virtual controller. 1-5 for local SSD, 1-10 for persistent SSD
+- DISK_TYPE = local, ssd, or hdd. Only applies to custom templates
+- DISK_CONFIG = [disks per vm]_[disk size in GB] example: "8_375" will create 8, 375GB disks. Only applies to custom templates
+- VM_CONFIG = [cpu cores per vm]_[ram per vm] example "20_128" will create 20 CPU, 128GB RAM VMs. Default: "4_42" Only applies to custom templates
 - CLUSTER_NAME = Name for ECFS service
 - ZONE = Zone
 - PROJECT = Project name
@@ -20,6 +22,7 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - CREDENTIALS = path to service account credentials .json file
 - SERVICE_EMAIL = service account email address
 3. Run 'terraform init' then 'terraform apply'
+
 
 ## Components:
 
