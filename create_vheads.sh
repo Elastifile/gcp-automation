@@ -1,5 +1,5 @@
 #!/bin/bash
-#create vheads.sh, Andrew Renz, Sept 2017, Jan 2018
+#create vheads.sh, Andrew Renz, Sept 2017, June 2018
 #Script to configure Elastifile EManage (EMS) Server, and deploy cluster of ECFS virtual controllers (vheads) in Google Compute Platform (GCE)
 #Requires terraform to determine EMS address and name (Set EMS_ADDRESS and EMS_NAME to use standalone)
 
@@ -76,7 +76,7 @@ echo "NUM_OF_DISKS: $NUM_OF_DISKS" | tee -a $LOG
 
 #establish https session
 function establish_session {
-echo -e "\nEstablishing https session..\n" | tee -a $LOG
+echo -e "Establishing https session..\n" | tee -a $LOG
 curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://$EMS_ADDRESS/api/sessions >> $LOG 2>&1
 }
 
@@ -104,13 +104,13 @@ function first_run {
 
 function set_storage_type {
   if [[ $1 == "small" ]]; then
-    echo -e "Setting storage type: $1" | tee -a $LOG
+    echo -e "Setting storage type $1..." | tee -a $LOG
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":1}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
   elif [[ $1 == "medium" ]]; then
-    echo -e "Setting storage type: $1" | tee -a $LOG
+    echo -e "Setting storage type $1..." | tee -a $LOG
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":2}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
   elif [[ $1 == "standard" ]]; then
-    echo -e "Setting storage type: $1" | tee -a $LOG
+    echo -e "Setting storage type $1..." | tee -a $LOG
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":3}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
   fi
 }
@@ -127,29 +127,36 @@ function set_storage_type_custom {
 }
 
 function setup_ems {
-  echo -e  "\n Establish new https session using updated PASSWORD...\n" | tee -a $LOG
+  echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a $LOG
   establish_session $PASSWORD
 
   #configure EMS
-  echo -e "\nConfigure EMS...\n" | tee -a $LOG
+  echo -e "Configure EMS...\n" | tee -a $LOG
+
+  echo -e "Get cloud provider id 1\n" | tee -a $LOG
+  curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" >> $LOG 2>&1
+
+  echo -e "Validate project configuration\n" | tee -a $LOG
+  curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1/validate" >> $LOG 2>&1
+
+  echo -e "Configure systems...\n" | tee -a $LOG
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":2,"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' https://$EMS_ADDRESS/api/systems/1 >> $LOG 2>&1
 
-  echo -e "\nSet storage type\n" | tee -a $LOG
   if [[ $NUM_OF_VMS == 0 ]]; then
-    echo -e "0 VMs configured, skipping set storage type."
+    echo -e "0 VMs configured, skipping set storage type.\n"
   elif [[ $CONFIGTYPE == "custom" ]]; then
+    echo -e "Set storage type custom $DISKTYPE $DISK_CONFIG $VM_CONFIG \n" | tee -a $LOG
     set_storage_type_custom $DISKTYPE $DISK_CONFIG $VM_CONFIG
   else
+    echo -e "Set storage type $CONFIGTYPE \n" | tee -a $LOG
     set_storage_type $CONFIGTYPE
   fi
 
-  #update terraform state with SETUP_COMPLETE
-  #terraform apply -var 'SETUP_COMPLETE=true'
 }
 
 # Kickoff a create vhead instances job
 function create_instances {
-  echo -e "\nCreating $NUM_OF_VMS ECFS instances\n" | tee -a $LOG
+  echo -e "Creating $NUM_OF_VMS ECFS instances\n" | tee -a $LOG
   curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true,"auto_start":true}' https://$EMS_ADDRESS/api/hosts/create_instances >> $LOG 2>&1
 }
 
@@ -189,22 +196,18 @@ function create_data_container {
   fi
 }
 
-function deploy_cluster {
-  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"auto_start":true}' https://$EMS_ADDRESS/api/systems/1/setup >> $LOG 2>&1
-}
-
 # Provision  and deploy
 function add_capacity {
   establish_session $PASSWORD
   if [[ $NUM_OF_VMS == 0 ]]; then
-    echo -e "0 VMs configured, skipping create instances"
+    echo -e "0 VMs configured, skipping create instances\n"
   else
     create_instances $NUM_OF_VMS
+    job_status "create_instances_job"
     echo "Start cluster deployment\n" | tee -a $LOG
     job_status "activate_emanage_job"
   fi
 }
-
 
 # terraform variables to store state, unused for now
 PASSWORD_IS_CHANGED=`terraform show | grep metadata.setup_complete | cut -d " " -f 5`

@@ -8,7 +8,7 @@ NUM_OF_VMS = "3"
 DISK_CONFIG = "8_375"
 # <num_of_disks>_<disk_size>
 MIN_CLUSTER = "4"
-CLUSTER_NAME = "ecfs"
+CLUSTER_NAME = "ecfs-andrew"
 ZONE = "us-west1-c"
 PROJECT = "elastifile-sa"
 NETWORK = "default"
