@@ -26,14 +26,8 @@ done
 #delete the instance group
 gcloud compute instance-groups unmanaged delete "$LB_NAME-ig" --zone=$ZONE --quiet &
 
-#delete the static routes
-ROUTESLIST=`gcloud compute routes list --filter="name:$LB_NAME" | grep $LB_NAME | cut -d " " -f 1`
-for i in $ROUTESLIST; do
-gcloud compute routes delete $i --quiet &
-done
-
 #delete the VPC network
-DEFAULTROUTES=`gcloud beta compute routes list | grep $LB_NAME | cut -d " " -f 1`
+DEFAULTROUTES=`gcloud compute routes list | grep $LB_NAME | cut -d " " -f 1`
 for i in $DEFAULTROUTES; do
 gcloud compute routes delete $i --quiet &
 done
