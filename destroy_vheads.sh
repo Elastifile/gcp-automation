@@ -12,7 +12,7 @@ PASSWORD=`cat password.txt | cut -d " " -f 1`
 EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
 
 #Establish https session
-curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/sessions
+curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/sessions 2>&1
 
 #grab the LB name
 LB_NAME=`curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" | grep load_balancer_name | cut -d , -f 7 | cut -d \" -f 4`
