@@ -57,7 +57,7 @@ resource "google_compute_instance" "Elastifile-ECFS" {
 
   boot_disk {
     initialize_params {
-      image = "projects/elastifile-ci/global/images/${var.IMAGE}"
+      image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
     }
   }
 
