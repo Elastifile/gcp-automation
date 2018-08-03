@@ -31,8 +31,8 @@ DEFAULTROUTES=`gcloud compute routes list | grep $LB_NAME | cut -d " " -f 1`
 for i in $DEFAULTROUTES; do
 gcloud compute routes delete $i --quiet &
 done
-gcloud beta compute addresses delete "$LB_NAME-ip" --region $REGION --quiet
-gcloud beta compute networks subnets delete "$LB_NAME-ip-net-sub" --region $REGION --quiet
+gcloud compute addresses delete "$LB_NAME-ip" --region $REGION --quiet
+gcloud compute networks subnets delete "$LB_NAME-ip-net-sub" --region $REGION --quiet
 gcloud compute networks delete "$LB_NAME-ip-net" --quiet
 
 # --quiet --no-user-output-enabled

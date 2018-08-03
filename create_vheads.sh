@@ -86,18 +86,12 @@ function first_run {
     emsresponse=`curl -k -s -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions | grep created_at | cut -d , -f 8 | cut -d \" -f 2`
     echo -e "Waiting for EMS init...\n" | tee -a $LOG
     if [[ $emsresponse == "created_at" ]]; then
+      sleep 30
       echo -e "EMS now ready!\n" | tee -a $LOG
-      sleep 5
       break
     fi
-    sleep 5
+    sleep 10
   done
-  #accept EULA
-  echo -e "Accepting EULA.. \n" | tee -a $LOG
-  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> $LOG 2>&1
-  echo -e "Updating password...\n" | tee -a $LOG
-  #update ems password
-  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> $LOG 2>&1
 }
 
 # Configure ECFS storage type
@@ -127,16 +121,18 @@ function set_storage_type_custom {
 }
 
 function setup_ems {
-  echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a $LOG
-  establish_session $PASSWORD
+  # establish_session changeme
+  #accept EULA
+  echo -e "\nAccepting EULA.. \n" | tee -a $LOG
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> $LOG 2>&1
 
   #configure EMS
   echo -e "Configure EMS...\n" | tee -a $LOG
 
-  echo -e "Get cloud provider id 1\n" | tee -a $LOG
+  echo -e "\nGet cloud provider id 1\n" | tee -a $LOG
   curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" >> $LOG 2>&1
 
-  echo -e "Validate project configuration\n" | tee -a $LOG
+  echo -e "\nValidate project configuration\n" | tee -a $LOG
   curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1/validate" >> $LOG 2>&1
 
   echo -e "Configure systems...\n" | tee -a $LOG
@@ -198,7 +194,6 @@ function create_data_container {
 
 # Provision  and deploy
 function add_capacity {
-  establish_session $PASSWORD
   if [[ $NUM_OF_VMS == 0 ]]; then
     echo -e "0 VMs configured, skipping create instances\n"
   else
@@ -207,6 +202,14 @@ function add_capacity {
     echo "Start cluster deployment\n" | tee -a $LOG
     job_status "activate_emanage_job"
   fi
+}
+
+function change_password {
+  echo -e "Updating password...\n" | tee -a $LOG
+  #update ems password
+  curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> $LOG 2>&1
+  echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a $LOG
+  establish_session $PASSWORD
 }
 
 # terraform variables to store state, unused for now
@@ -221,6 +224,7 @@ if [ "$SETUP_COMPLETE" = "false" ]; then
   setup_ems
   add_capacity
   create_data_container
+  change_password
 else
   add_capacity
 fi
