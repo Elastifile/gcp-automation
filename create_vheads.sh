@@ -41,7 +41,7 @@ echo "EMS_ADDRESS: $EMS_ADDRESS" | tee $LOG
 echo "EMS_NAME: $EMS_NAME" | tee -a $LOG
 echo "EMS_HOSTNAME: $EMS_HOSTNAME" | tee -a $LOG
 
-while getopts "h?:c:t:n:d:v:" opt; do
+while getopts "h?:c:l:t:n:d:v:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -49,6 +49,8 @@ while getopts "h?:c:t:n:d:v:" opt; do
         ;;
     c)  CONFIGTYPE=${OPTARG}
         [ "${CONFIGTYPE}" = "small" -o "${CONFIGTYPE}" = "medium" -o "${CONFIGTYPE}" = "hdd" -o "${CONFIGTYPE}" = "custom" ] || usage
+        ;;
+    l)  USE_LB=${OPTARG}
         ;;
     t)  DISKTYPE=${OPTARG}
         [ "${DISKTYPE}" = "ssd" -o "${DISKTYPE}" = "hdd" -o "${DISKTYPE}" = "local" ] || usage
@@ -60,11 +62,6 @@ while getopts "h?:c:t:n:d:v:" opt; do
         ;;
     v)  VM_CONFIG=${OPTARG}
         ;;
-#    p)  PASSWORD=${OPTARG}
-#        ;;
-#add s: back to getopts if impliment DISK_SIZE
-#    s)  DISK_SIZE=${OPTARG}
-#        ;;
     esac
 done
 
@@ -102,7 +99,7 @@ function set_storage_type {
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":1}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
   elif [[ $1 == "medium" ]]; then
     echo -e "Setting storage type $1..." | tee -a $LOG
-    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":2}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":2}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
   elif [[ $1 == "standard" ]]; then
     echo -e "Setting storage type $1..." | tee -a $LOG
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":true,"cloud_configuration_id":3}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
