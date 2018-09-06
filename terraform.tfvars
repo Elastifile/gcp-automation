@@ -1,7 +1,7 @@
 TEMPLATE_TYPE = "medium"
 #small,medium,standard,custom
 NUM_OF_VMS = "3"
-USE_LB = "true"
+USE_LB = "false"
 DISK_TYPE = "local"
 #local,ssd,hdd
 VM_CONFIG = "20_128"
@@ -12,7 +12,6 @@ MIN_CLUSTER = "3"
 CLUSTER_NAME = "elastifile-storage"
 ZONE = "us-west1-c"
 PROJECT = "elastifile-sa"
-NETWORK = "default"
 SUBNETWORK = "default"
 IMAGE = "elastifile-storage-2-7-5-6-ems"
 CREDENTIALS = "andrew-sa-elastifile-sa.json"
