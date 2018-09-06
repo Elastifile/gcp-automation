@@ -1,7 +1,7 @@
 TEMPLATE_TYPE = "medium"
 #small,medium,standard,custom
 NUM_OF_VMS = "3"
-USE_LB = "false"
+USE_LB = "true"
 DISK_TYPE = "local"
 #local,ssd,hdd
 VM_CONFIG = "20_128"
