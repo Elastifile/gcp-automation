@@ -88,7 +88,6 @@ resource "google_compute_instance" "Elastifile-ECFS" {
   }
 
   metadata_startup_script = <<SCRIPT
-  "echo ${var.IMAGE} > /ecfs_image.txt"
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=GCP-Launcher >> /elastifile/emanage/lic/license.gcp.lic
