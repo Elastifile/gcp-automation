@@ -118,7 +118,7 @@ function set_storage_type_custom {
     echo -e "Configure systems...\n" | tee -a $LOG
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":2,"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' https://$EMS_ADDRESS/api/systems/1 >> $LOG 2>&1
     echo -e "Setting custom storage type: $type, num of disks: $disks, disk size=$disk_size cpu cores: $cpu_cores, ram: $ram \n" | tee -a $LOG
-    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"name":"custom","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations >> $LOG 2>&1
+    curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"name":"legacy","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations >> $LOG 2>&1
     curl -k -b $SESSION_FILE -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":5}' https://$EMS_ADDRESS/api/cloud_providers/1 >> $LOG 2>&1
 }
 
