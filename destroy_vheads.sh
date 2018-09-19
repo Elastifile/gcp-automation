@@ -38,5 +38,7 @@ if [[ $3 == "true" ]]; then
   gcloud compute networks delete "$LB_NAME-ip-net" --quiet
 fi
 
+gcloud compute instances delete $1 --zone=$ZONE --quiet &
+
 exit 0
 # --quiet --no-user-output-enabled
