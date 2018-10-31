@@ -17,6 +17,7 @@ Usage:
   -n number of vhead instances (cluster size)
   -d disk config eg 8_375
   -v vm config  eg 4_42
+  -p use public IP: "true" "false"
 E_O_F
   exit 1
 }
@@ -35,14 +36,10 @@ LOG="create_vheads.log"
 #DISK_SIZE=
 
 #capture computed variables
-EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
 EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
 EMS_HOSTNAME="${EMS_NAME}.local"
-echo "EMS_ADDRESS: $EMS_ADDRESS" | tee $LOG
-echo "EMS_NAME: $EMS_NAME" | tee -a $LOG
-echo "EMS_HOSTNAME: $EMS_HOSTNAME" | tee -a $LOG
 
-while getopts "h?:c:l:t:n:d:v:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -63,9 +60,20 @@ while getopts "h?:c:l:t:n:d:v:" opt; do
         ;;
     v)  VM_CONFIG=${OPTARG}
         ;;
+    p)  USE_PUBLIC_IP=${OPTARG}
+        ;;
     esac
 done
 
+if [[ $USE_PUBLIC_IP -eq 1 ]]; then
+  EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
+else
+  EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
+fi
+
+echo "EMS_ADDRESS: $EMS_ADDRESS" | tee $LOG
+echo "EMS_NAME: $EMS_NAME" | tee -a $LOG
+echo "EMS_HOSTNAME: $EMS_HOSTNAME" | tee -a $LOG
 echo "DISKTYPE: $DISKTYPE" | tee -a $LOG
 echo "NUM_OF_VMS: $NUM_OF_VMS" | tee -a $LOG
 echo "NUM_OF_DISKS: $NUM_OF_DISKS" | tee -a $LOG
