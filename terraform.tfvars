@@ -25,3 +25,5 @@ SUBNETWORK = "default"
 # GCP service account credential filename
 CREDENTIALS = "andrew-sa-elastifile-sa.json"
 SERVICE_EMAIL = "andrew-sa@elastifile-sa.iam.gserviceaccount.com"
+# true false
+USE_PUBLIC_IP = true
