@@ -35,10 +35,6 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-#capture computed variables
-EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
-EMS_HOSTNAME="${EMS_NAME}.local"
-
 while getopts "h?:c:l:t:n:d:v:p:" opt; do
     case "$opt" in
     h|\?)
@@ -65,6 +61,9 @@ while getopts "h?:c:l:t:n:d:v:p:" opt; do
     esac
 done
 
+#capture computed variables
+EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
+EMS_HOSTNAME="${EMS_NAME}.local"
 if [[ $USE_PUBLIC_IP -eq 1 ]]; then
   EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
 else
@@ -77,6 +76,7 @@ echo "EMS_HOSTNAME: $EMS_HOSTNAME" | tee -a $LOG
 echo "DISKTYPE: $DISKTYPE" | tee -a $LOG
 echo "NUM_OF_VMS: $NUM_OF_VMS" | tee -a $LOG
 echo "NUM_OF_DISKS: $NUM_OF_DISKS" | tee -a $LOG
+echo "USE_LB: $USE_LB" | tee -a $LOG
 
 #set -x
 
