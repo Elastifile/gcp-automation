@@ -53,7 +53,7 @@ provider "google" {
   region      = "${var.ZONE}"
 }
 
-resource "google_compute_instance" "Elastifile-ECFS-Public" {
+resource "google_compute_instance" "Elastifile-EMS-Public" {
   count        = "${var.USE_PUBLIC_IP}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-4"
@@ -111,7 +111,7 @@ SCRIPT
   }
 
 }
-resource "google_compute_instance" "Elastifile-ECFS-Private" {
+resource "google_compute_instance" "Elastifile-EMS-Private" {
   count        = "${1 - var.USE_PUBLIC_IP}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-4"
@@ -173,7 +173,7 @@ resource "null_resource" "create_cluster" {
 
   }
 
-  depends_on = ["google_compute_instance.Elastifile-ECFS-Public","google_compute_instance.Elastifile-ECFS-Private"]
+  depends_on = ["google_compute_instance.Elastifile-EMS-Public","google_compute_instance.Elastifile-EMS-Private"]
 
   provisioner "local-exec" {
     when = "destroy"
