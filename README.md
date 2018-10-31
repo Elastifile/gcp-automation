@@ -21,6 +21,8 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - IMAGE = EMS image name
 - CREDENTIALS = path to service account credentials .json file if not using
 - SERVICE_EMAIL = service account email address
+- USE_PUBLIC_IP = true/false. true is creating ems with public IP. false is creating ems without public IP.
+
 3. Run 'terraform init' then 'terraform apply'
 
 
