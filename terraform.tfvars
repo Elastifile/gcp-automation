@@ -1,7 +1,7 @@
 # Elastifile image version
 IMAGE = "elastifile-storage-3-0-0-14-ems"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
-TEMPLATE_TYPE = "small"
+TEMPLATE_TYPE = "medium"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
 # <cpucores>_<ram> default: 4_42
@@ -27,3 +27,8 @@ CREDENTIALS = "elastifile-gce-lab-c323-4c9bbf952fce.json"
 SERVICE_EMAIL = "terraform-sa-ooo@elastifile-gce-lab-c323.iam.gserviceaccount.com"
 # true false
 USE_PUBLIC_IP = true
+# singlecopy
+SINGLE_COPY = "true"
+# singlezone
+MULTI_ZONE = "true"
+

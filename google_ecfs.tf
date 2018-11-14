@@ -1,52 +1,74 @@
-variable "DISK_TYPE"{
+variable "DISK_TYPE" {
   default = "persistent"
 }
-variable "TEMPLATE_TYPE"{
+
+variable "TEMPLATE_TYPE" {
   default = "medium"
 }
-variable "USE_LB"{
+
+variable "USE_LB" {
   default = true
 }
-variable "VM_CONFIG"{
+
+variable "VM_CONFIG" {
   default = "4_42"
 }
-variable "NUM_OF_VMS"{
+
+variable "NUM_OF_VMS" {
   default = "3"
 }
-variable "DISK_CONFIG"{
+
+variable "DISK_CONFIG" {
   default = "5_2000"
 }
-variable "CLUSTER_NAME"{
-}
-variable "IMAGE"{
-}
-variable "SETUP_COMPLETE"{
+
+variable "CLUSTER_NAME" {}
+
+variable "IMAGE" {}
+
+variable "SETUP_COMPLETE" {
   default = "false"
 }
-variable "PASSWORD_IS_CHANGED"{
+
+variable "PASSWORD_IS_CHANGED" {
   default = "false"
 }
-variable "PASSWORD"{
+
+variable "PASSWORD" {
   default = "changeme"
 }
-variable "ZONE"{
+
+variable "ZONE" {
   default = "us-central1-a"
 }
-variable "NETWORK"{
+
+variable "NETWORK" {
   default = "default"
 }
-variable "SUBNETWORK"{
+
+variable "SUBNETWORK" {
   default = "default"
 }
-variable "PROJECT"{
-}
-variable "CREDENTIALS"{
-}
-variable "SERVICE_EMAIL"{
-}
-variable "USE_PUBLIC_IP"{
+
+variable "PROJECT" {}
+
+variable "CREDENTIALS" {}
+
+variable "SERVICE_EMAIL" {}
+
+variable "USE_PUBLIC_IP" {
   default = true
 }
+
+variable "SINGLE_COPY" {
+  default = true
+}
+
+variable "MULTI_ZONE" {
+  default = false
+}
+
+
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -78,16 +100,16 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   }
 
   metadata {
-    ecfs_ems = "true"
-    reference_name = "${var.CLUSTER_NAME}"
-    version = "${var.IMAGE}"
-    template_type = "${var.TEMPLATE_TYPE}"
-    cluster_size = "${var.NUM_OF_VMS}"
-    use_load_balancer = "${var.USE_LB}"
-    disk_type = "${var.DISK_TYPE}"
-    disk_config = "${var.DISK_CONFIG}"
+    ecfs_ems            = "true"
+    reference_name      = "${var.CLUSTER_NAME}"
+    version             = "${var.IMAGE}"
+    template_type       = "${var.TEMPLATE_TYPE}"
+    cluster_size        = "${var.NUM_OF_VMS}"
+    use_load_balancer   = "${var.USE_LB}"
+    disk_type           = "${var.DISK_TYPE}"
+    disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
-    setup_complete = "${var.SETUP_COMPLETE}"
+    setup_complete      = "${var.SETUP_COMPLETE}"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -104,13 +126,13 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   sudo echo gvcNeIC4aTBzdQ7aFFr7ZnVHlAs26OzDKeCF7Q9fsaVaBcljCi4= >> /elastifile/emanage/lic/license.gcp.lic
 SCRIPT
 
-# specify the GCP project service account to use
+  # specify the GCP project service account to use
   service_account {
-    email = "${var.SERVICE_EMAIL}"
+    email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
   }
-
 }
+
 resource "google_compute_instance" "Elastifile-EMS-Private" {
   count        = "${1 - var.USE_PUBLIC_IP}"
   name         = "${var.CLUSTER_NAME}"
@@ -129,20 +151,19 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
     #specify only one:
     #network = "${var.NETWORK}"
     subnetwork = "${var.SUBNETWORK}"
-
-   }
+  }
 
   metadata {
-    ecfs_ems = "true"
-    reference_name = "${var.CLUSTER_NAME}"
-    version = "${var.IMAGE}"
-    template_type = "${var.TEMPLATE_TYPE}"
-    cluster_size = "${var.NUM_OF_VMS}"
-    use_load_balancer = "${var.USE_LB}"
-    disk_type = "${var.DISK_TYPE}"
-    disk_config = "${var.DISK_CONFIG}"
+    ecfs_ems            = "true"
+    reference_name      = "${var.CLUSTER_NAME}"
+    version             = "${var.IMAGE}"
+    template_type       = "${var.TEMPLATE_TYPE}"
+    cluster_size        = "${var.NUM_OF_VMS}"
+    use_load_balancer   = "${var.USE_LB}"
+    disk_type           = "${var.DISK_TYPE}"
+    disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
-    setup_complete = "${var.SETUP_COMPLETE}"
+    setup_complete      = "${var.SETUP_COMPLETE}"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -159,25 +180,24 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
   sudo echo gvcNeIC4aTBzdQ7aFFr7ZnVHlAs26OzDKeCF7Q9fsaVaBcljCi4= >> /elastifile/emanage/lic/license.gcp.lic
 SCRIPT
 
-# specify the GCP project service account to use
+  # specify the GCP project service account to use
   service_account {
-    email = "${var.SERVICE_EMAIL}"
+    email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
   }
-
 }
+
 resource "null_resource" "create_cluster" {
   provisioner "local-exec" {
-    command = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP}"
-    interpreter = ["/bin/bash","-c"]
-
+    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    interpreter = ["/bin/bash", "-c"]
   }
 
-  depends_on = ["google_compute_instance.Elastifile-EMS-Public","google_compute_instance.Elastifile-EMS-Private"]
+  depends_on = ["google_compute_instance.Elastifile-EMS-Public", "google_compute_instance.Elastifile-EMS-Private"]
 
   provisioner "local-exec" {
-    when = "destroy"
-    command = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB}"
-    interpreter = ["/bin/bash","-c"]
+    when        = "destroy"
+    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB}"
+    interpreter = ["/bin/bash", "-c"]
   }
 }
