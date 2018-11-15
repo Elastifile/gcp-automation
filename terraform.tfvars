@@ -30,5 +30,5 @@ USE_PUBLIC_IP = true
 # singlecopy
 SINGLE_COPY = "true"
 # singlezone
-MULTI_ZONE = "true"
+MULTI_ZONE = "false"
 

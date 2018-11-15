@@ -68,7 +68,6 @@ variable "MULTI_ZONE" {
   default = false
 }
 
-
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -187,7 +186,7 @@ SCRIPT
   }
 }
 
-resource "null_resource" "create_cluster" {
+resource "null_resource" "cluster" {
   provisioner "local-exec" {
     command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
     interpreter = ["/bin/bash", "-c"]
@@ -197,7 +196,7 @@ resource "null_resource" "create_cluster" {
 
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB}"
+    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
     interpreter = ["/bin/bash", "-c"]
   }
 }

@@ -183,6 +183,24 @@ function setup_ems {
     echo -e "Set storage type ${CONFIGTYPE} \n" | tee -a ${LOG}
     set_storage_type ${CONFIGTYPE}
   fi
+
+  if [[ ${SINGLE_COPY} = true ]]; then
+    echo -e "\n Use  SINGLE_COPY \n" | tee -a ${LOG}
+    echo -e "ֿ\n Use SINGLE_COPY.\n"
+	echo -e "Set data replication level to 1 \n" | tee -a ${LOG}
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"replication_level":1}' https://${EMS_ADDRESS}/api/systems/1 >> ${LOG} 2>&1
+  fi
+
+  if [[ ${USE_LB} = true ]]; then
+    echo -e "\n Use Load Balancer \n" | tee -a ${LOG}
+    echo -e "ֿ\n Use Load Balancer.\n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_use":true}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+    echo -e "\n GET"
+    lb_vip=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
+    echo -e "\n lb_vip "${lb_vip}" \n" | tee -a ${LOG}
+    echo -e "\n lb_vip "${lb_vip}" \n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${lb_vip}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+  fi
   if [[ ${MULTI_ZONE} = true ]]; then
     echo -e "Multi Zone.\n" | tee -a ${LOG}
     echo -e "Multi Zone.\n"
@@ -196,24 +214,6 @@ function setup_ems {
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"availability_zone_use":false}' https://${EMS_ADDRESS}/api/cloud_providers/1 >> ${LOG} 2>&1
 
   fi
-  if [[ ${SINGLE_COPY} = true ]]; then
-    echo -e "\n Use  SINGLE_COPY \n" | tee -a ${LOG}
-    echo -e "ֿ\n Use SINGLE_COPY.\n"
-	echo -e "Set data replication level to 1 \n" | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"replication_level":1}' https://${EMS_ADDRESS}/api/systems/1/accept_eula >> ${LOG} 2>&1
-  fi
-
-  if [[ ${USE_LB} = true ]]; then
-    echo -e "\n Use Load Balancer \n" | tee -a ${LOG}
-    echo -e "ֿ\n Use Load Balancer.\n"
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_use":true}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-    echo -e "\n GET"
-    lb_vip=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
-    echo -e "\n lb_vip "${lb_vip}" \n" | tee -a ${LOG}
-    echo -e "\n lb_vip "${lb_vip}" \n"
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${lb_vip}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  fi
-
 
 }
 
