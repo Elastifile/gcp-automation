@@ -27,8 +27,8 @@ CREDENTIALS = "elastifile-gce-lab-c323-4c9bbf952fce.json"
 SERVICE_EMAIL = "terraform-sa-ooo@elastifile-gce-lab-c323.iam.gserviceaccount.com"
 # true false
 USE_PUBLIC_IP = true
-# singlecopy
+# true false
 SINGLE_COPY = true
-# singlezone
+# true false
 MULTI_ZONE = false
 
