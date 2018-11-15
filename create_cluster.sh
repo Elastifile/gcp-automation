@@ -275,10 +275,10 @@ PASSWORD_IS_CHANGED=`terraform show | grep metadata.setup_complete | cut -d " " 
 SETUP_COMPLETE=`terraform show | grep metadata.setup_complete | cut -d " " -f 5`
 
 # Main
-if [ "${PASSWORD_IS_CHANGED}" = "false" ]; then
+if [[ "${PASSWORD_IS_CHANGED}" = "false" ]]; then
   first_run
 fi
-if [ "${SETUP_COMPLETE}" = "false" ]; then
+if [[ "${SETUP_COMPLETE}" = "false" ]]; then
   setup_ems
   add_capacity
   create_data_container

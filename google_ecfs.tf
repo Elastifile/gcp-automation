@@ -130,6 +130,12 @@ SCRIPT
     email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
   }
+  provisioner "local-exec" {
+    when        = "destroy"
+    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+  
 }
 
 resource "google_compute_instance" "Elastifile-EMS-Private" {
@@ -184,11 +190,25 @@ SCRIPT
     email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
   }
+  provisioner "local-exec" {
+    when        = "destroy"
+    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+resource "null_resource" "elfs-enodes"{
+   provisioner "local-exec" {
+    when        = "create"
+    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS}"
+    interpreter = ["/bin/bash", "-c"]
+  }
 }
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    when        = "create"
+    command     = "./create_cluster.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
     interpreter = ["/bin/bash", "-c"]
   }
 

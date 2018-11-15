@@ -11,7 +11,7 @@ DISK_TYPE = "local"
 # <num_of_disks>_<disk_size>
 DISK_CONFIG = "4_375"
 # "true" "false"
-USE_LB = "true"
+USE_LB = true
 #
 MIN_CLUSTER = "3"
 # instance prefix
@@ -28,7 +28,7 @@ SERVICE_EMAIL = "terraform-sa-ooo@elastifile-gce-lab-c323.iam.gserviceaccount.co
 # true false
 USE_PUBLIC_IP = true
 # singlecopy
-SINGLE_COPY = "true"
+SINGLE_COPY = false
 # singlezone
-MULTI_ZONE = "false"
+MULTI_ZONE = false
 
