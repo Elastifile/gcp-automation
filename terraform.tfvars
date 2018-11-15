@@ -28,7 +28,7 @@ SERVICE_EMAIL = "terraform-sa-ooo@elastifile-gce-lab-c323.iam.gserviceaccount.co
 # true false
 USE_PUBLIC_IP = true
 # singlecopy
-SINGLE_COPY = "true"
+SINGLE_COPY = true
 # singlezone
-MULTI_ZONE = "false"
+MULTI_ZONE = false
 
