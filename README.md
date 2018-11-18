@@ -31,19 +31,21 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 **google_ecfs.tf**
 Main terraform configuration file.
 
-**create_vheads.sh**
-Bash script to configure Elastifile eManage (EMS) Server via Elastifile REST API. EMS will deploy cluster of ECFS virtual controllers (vheads). Called as null_provider from google_ecfs.tf
+**create_enodes.sh**
+Bash script to configure Elastifile eManage (EMS) Server via Elastifile REST API. EMS will deploy cluster of ECFS virtual controllers (enodes). Called as null_provider from google_ecfs.tf
 
 Note: REST calls are HTTPS (443) to the public IP of EMS. Ensure GCP project firewall rules allow 443 (ingress) from wherever this Terraform template is run.
 
-**destroy_vheads.sh**
-Bash script to query and delete multiple GCE instances and network resources simultaneously. Called as null_provider destroy from google_ecfs.tf
+**destroy_enodes.sh**
+Bash script to query and delete multiple GCE instances and network resources simultaneously. Called as null_provider destroy from google_ecfs.tf 
+
+!!! this script changes the gcloud current project to the terraform.tfvars project
 
 **password.txt**
 Plaintext file with EMS password
 
 ## Troubleshooting:
-**create_vheads.log**
+**create_enodes.log**
 Output of REST commands
 
 **/elastifile/log/**

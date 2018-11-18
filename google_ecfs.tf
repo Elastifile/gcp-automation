@@ -188,7 +188,7 @@ SCRIPT
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    command     = "./create_enodes.sh -c ${var.TEMPLATE_TYPE} -l ${var.USE_LB} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
     interpreter = ["/bin/bash", "-c"]
   }
 
@@ -196,7 +196,7 @@ resource "null_resource" "cluster" {
 
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB} -p ${var.USE_PUBLIC_IP} -s ${var.SINGLE_COPY} -m ${var.MULTI_ZONE}"
+    command     = "./destroy_enodes.sh  ${var.CLUSTER_NAME} ${var.ZONE} ${var.USE_LB}  ${var.USE_PUBLIC_IP}  ${var.SINGLE_COPY}  ${var.MULTI_ZONE}  ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
