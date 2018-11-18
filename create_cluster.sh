@@ -218,12 +218,6 @@ function setup_ems {
 
 }
 
-# Kickoff a create vhead instances job
-function create_instances {
-  echo -e "Creating $NUM_OF_VMS ECFS instances\n" | tee -a ${LOG}
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"instances":'$1',"async":true,"auto_start":true}' https://$EMS_ADDRESS/api/hosts/create_instances >> ${LOG} 2>&1
-}
-
 # Function to check running job status
 function job_status {
   while true; do
@@ -242,33 +236,6 @@ function job_status {
   done
 }
 
-# Create data containers
-function create_data_container {
-  if [[ $NUM_OF_VMS != 0 ]]; then
-    echo -e "Create data container & 1000GB NFS export /DC01/root\n" | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"name":"DC01","dedup":0,"compression":1,"soft_quota":{"bytes":1073741824000},"hard_quota":{"bytes":1073741824000},"policy_id":1,"dir_uid":0,"dir_gid":0,"dir_permissions":"755","data_type":"general_purpose","namespace_scope":"global","exports_attributes":[{"name":"root","path":"/","user_mapping":"remap_all","uid":0,"gid":0,"access_permission":"read_write","client_rules_attributes":[],"namespace_scope":"global","data_type":"general_purpose"}]}' https://$EMS_ADDRESS/api/data_containers >> ${LOG} 2>&1
-  fi
-}
-
-# Provision  and deploy
-function add_capacity {
-  if [[ $NUM_OF_VMS == 0 ]]; then
-    echo -e "0 VMs configured, skipping create instances\n"
-  else
-    create_instances $NUM_OF_VMS
-    job_status "create_instances_job"
-    echo "Start cluster deployment\n" | tee -a ${LOG}
-    job_status "activate_emanage_job"
-  fi
-}
-
-function change_password {
-  echo -e "Updating password...\n" | tee -a ${LOG}
-  #update ems password
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> ${LOG} 2>&1
-  echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a ${LOG}
-  establish_session $PASSWORD
-}
 
 # terraform variables to store state, unused for now
 PASSWORD_IS_CHANGED=`terraform show | grep metadata.setup_complete | cut -d " " -f 5`
@@ -280,9 +247,4 @@ if [[ "${PASSWORD_IS_CHANGED}" = "false" ]]; then
 fi
 if [[ "${SETUP_COMPLETE}" = "false" ]]; then
   setup_ems
-  add_capacity
-  create_data_container
-  change_password
-else
-  add_capacity
 fi

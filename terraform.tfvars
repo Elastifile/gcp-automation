@@ -10,7 +10,7 @@ VM_CONFIG = "4_42"
 DISK_TYPE = "local"
 # <num_of_disks>_<disk_size>
 DISK_CONFIG = "4_375"
-# "true" "false"
+# true / false
 USE_LB = true
 #
 MIN_CLUSTER = "3"
@@ -27,8 +27,8 @@ CREDENTIALS = "elastifile-gce-lab-c323-4c9bbf952fce.json"
 SERVICE_EMAIL = "terraform-sa-ooo@elastifile-gce-lab-c323.iam.gserviceaccount.com"
 # true false
 USE_PUBLIC_IP = true
-# singlecopy
+# true false
 SINGLE_COPY = false
-# singlezone
+# true / false
 MULTI_ZONE = false
 

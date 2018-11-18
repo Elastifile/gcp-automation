@@ -197,12 +197,13 @@ SCRIPT
   }
 }
 
-resource "null_resource" "elfs-enodes"{
+resource "null_resource" "elfs-enode"{
    provisioner "local-exec" {
     when        = "create"
-    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS}"
+    command     = "./update_vheads.sh -n 1"
     interpreter = ["/bin/bash", "-c"]
   }
+  depends_on = ["null_resource.cluster"]
 }
 
 resource "null_resource" "cluster" {
