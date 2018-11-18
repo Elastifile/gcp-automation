@@ -7,7 +7,7 @@ variable "TEMPLATE_TYPE" {
 }
 
 variable "USE_LB" {
-  default = true
+  default = "true"
 }
 
 variable "VM_CONFIG" {
