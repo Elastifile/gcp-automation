@@ -39,7 +39,7 @@ Note: REST calls are HTTPS (443) to the public IP of EMS. Ensure GCP project fir
 **destroy_enodes.sh**
 Bash script to query and delete multiple GCE instances and network resources simultaneously. Called as null_provider destroy from google_ecfs.tf 
 
-!!! this script changes the gcloud current project to the terraform.tfvars project
+*** Notice that this script changes the gcloud current project to the terraform.tfvars project and returns to the original
 
 **password.txt**
 Plaintext file with EMS password
