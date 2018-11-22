@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ux
+set -u
 
 #impliment command-line options
 #imported from EMS /elastifile/emanage/deployment/cloud/add_hosts_google.sh
@@ -29,6 +29,7 @@ SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
 SETUP_COMPLETE="false"
 NUM_OF_VMS=1
+EMS_ADDRESS="127.0.0.1"
 WEB=https
 LOG="add_enodes.log"
 
@@ -61,7 +62,7 @@ function add_capacity {
     echo -e "0 VMs configured, skipping create instances\n"
   fi
   create_instances ${1}
-  job_status "delete_instances_job"
+  job_status "add_instances_job"
 }
 
 # Kickoff a create enode instances job

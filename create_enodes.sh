@@ -3,7 +3,7 @@
 #Script to configure Elastifile EManage (EMS) Server, and deploy cluster of ECFS virtual controllers (enodes) in Google Compute Platform (GCE)
 #Requires terraform to determine EMS address and name (Set EMS_ADDRESS and EMS_NAME to use standalone)
 
-set -ux
+set -u
 
 # function code from https://gist.github.com/cjus/1047794 by itstayyab
 function jsonValue() {

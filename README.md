@@ -41,6 +41,12 @@ Bash script to query and delete multiple GCE instances and network resources sim
 
 *** Notice that this script changes the gcloud current project to the terraform.tfvars project and returns to the original
 
+**add_enode.sh**
+Bash script to add enodes to the Elastifile cluster
+
+**delete_enode.sh** 
+Bash script to remove enodes from the Elastifile cluster
+
 **password.txt**
 Plaintext file with EMS password
 
