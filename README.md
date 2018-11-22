@@ -10,18 +10,20 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 2. Specify configuration variables in terraform.tfvars:
 - TEMPLATE_TYPE = small, medium, standard, custom. Only use custom in consultation with Elastifile support
 - NUM_OF_VMS = Number of ECFS virtual controllers, 3 minimum for small/medium, 6 minimum for standard
-- USE_LB = true/false. true to let EMS setup a single google load balancer address for client NFS connections (Recommended H/A configuration), must be false when using shared VPC subnetwork
+- LB_TYPE = none, dns, elastifile, google
 - DISK_TYPE = local, ssd, or hdd. Only applies to custom templates
 - DISK_CONFIG = [disks per vm]_[disk size in GB] example: "8_375" will create 8, 375GB disks. Only applies to custom templates
 - VM_CONFIG = [cpu cores per vm]_[ram per vm] example "20_128" will create 20 CPU, 128GB RAM VMs. Default: "4_42" Only applies to custom templates
 - CLUSTER_NAME = Name for ECFS service, no longer than
-- ZONE = Zone
+- EMS_ZONE = EMS Zone
 - PROJECT = Project name
 - SUBNETWORK = Subnetwork to use. default or full path to use specific/custom project or shared vpc subnetwork eg projects/support-team-172804/regions/us-west1/subnetworks/andrew-shared-vpc-network-subnet
 - IMAGE = EMS image name
 - CREDENTIALS = path to service account credentials .json file if not using
 - SERVICE_EMAIL = service account email address
 - USE_PUBLIC_IP = true/false. true for creating ems with public IP. false for creating ems with private IP only.
+- DEPLOYMENT_TYPE = single, dual, multizone
+- NODES_ZONES = list of the zones for the nodes
 
 3. Run 'terraform init' then 'terraform apply'
 
