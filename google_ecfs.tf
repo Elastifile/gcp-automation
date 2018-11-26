@@ -107,7 +107,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     version             = "${var.IMAGE}"
     template_type       = "${var.TEMPLATE_TYPE}"
     cluster_size        = "${var.NUM_OF_VMS}"
-    use_load_balancer   = "${var.LB}"
+    use_load_balancer   = "${var.LB_TYPE}"
     disk_type           = "${var.DISK_TYPE}"
     disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
