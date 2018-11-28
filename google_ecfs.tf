@@ -71,6 +71,13 @@ variable "DEPLOYMENT_TYPE"{
   default = "dual"
 }
 
+variable "ADD_VHEADS"{
+  default = "0"
+}
+variable "REMOVE_VHEADS"{
+  default = "0"
+}
+
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -199,7 +206,7 @@ resource "null_resource" "cluster" {
 
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.EMS_ZONE} ${var.LB_TYPE} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE}"
+    command     = "./destroy_vheads.sh ${var.CLUSTER_NAME} ${var.EMS_ZONE} ${var.LB_TYPE} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -t ${var.CLUSTER_NAME}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
@@ -210,5 +217,23 @@ resource "null_resource" "google_ilb" {
     interpreter = ["/bin/bash", "-c"]
   }
 
+  depends_on = ["null_resource.cluster"]
+}
+
+resource "null_resource" "add_vheads" {
+  count = "${var.ADD_VHEADS != "0" ? 1 : 0}"
+  provisioner "local-exec" {
+    command     = "./add_vheads.sh -n ${var.ADD_VHEADS} -a ${var.USE_PUBLIC_IP}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+  depends_on = ["null_resource.cluster"]
+}
+
+resource "null_resource" "remove_vheads" {
+  count = "${var.REMOVE_VHEADS != "0" ? 1 : 0}"
+  provisioner "local-exec" {
+    command     = "./remove_vheads.sh -n ${var.REMOVE_VHEADS} -a ${var.USE_PUBLIC_IP}"
+    interpreter = ["/bin/bash", "-c"]
+  }
   depends_on = ["null_resource.cluster"]
 }

@@ -1,7 +1,7 @@
 # Elastifile image version
 IMAGE = "elastifile-storage-3-0-0-101-ems"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
-TEMPLATE_TYPE = "medium"
+TEMPLATE_TYPE = "small"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
 # <cpucores>_<ram> default: 4_42
@@ -10,7 +10,7 @@ VM_CONFIG = "4_42"
 DISK_TYPE = "persistent"
 # <num_of_disks>_<disk_size>
 DISK_CONFIG = "4_1000"
-# Load Balance mode - "none" "dns" "elastifle" "google"
+# Load Balance mode - "none" "dns" "elastifile" "google"
 LB_TYPE = "google"
 # numberof nodes to create
 MIN_CLUSTER = "3"
@@ -19,7 +19,7 @@ CLUSTER_NAME = "elastifile-guyr"
 # GCP region
 REGION = "us-central1"
 # GCP zone
-EMS_ZONE = "us-central1-f"
+EMS_ZONE = "us-central1-d"
 # GCP project
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork
@@ -32,6 +32,9 @@ SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.co
 # true false
 USE_PUBLIC_IP = true
 #deployment type - single, dual, multizone
-DEPLOYMENT_TYPE = "multizone"
-# availability zones for multizone selection
-NODES_ZONES = "us-central1-f,us-central1-c,us-central1-d"
+DEPLOYMENT_TYPE = "single"
+# availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
+NODES_ZONES = "us-central1-d"
+# add or remove number of vheads
+ADD_VHEADS = "0"
+REMOVE_VHEADS = "0" 
