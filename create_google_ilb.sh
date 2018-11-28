@@ -1,12 +1,6 @@
 #!/bin/bash
-#create vheads.sh, Andrew Renz, Sept 2017, June 2018
-#Script to configure Elastifile EManage (EMS) Server, and deploy cluster of ECFS virtual controllers (vheads) in Google Compute Platform (GCE)
-#Requires terraform to determine EMS address and name (Set EMS_ADDRESS and EMS_NAME to use standalone)
 
 set -ux
-
-#impliment command-line options
-#imported from EMS /elastifile/emanage/deployment/cloud/add_hosts_google.sh
 
 # function code from https://gist.github.com/cjus/1047794 by itstayyab
 function jsonValue() {
