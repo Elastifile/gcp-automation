@@ -24,8 +24,6 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - USE_PUBLIC_IP = true/false. true for creating ems with public IP. false for creating ems with private IP only.
 - DEPLOYMENT_TYPE = single, dual, multizone
 - NODES_ZONES = list of the zones for the nodes
-- ADD_VHEADS = "0" number of node to add to cluster
-- REMOVE_VHEADS = "0" number of nodes to remove from the cluster
 
 3. Run 'terraform init' then 'terraform apply'
 

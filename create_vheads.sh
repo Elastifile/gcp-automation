@@ -10,8 +10,7 @@ set -ux
 
 # function code from https://gist.github.com/cjus/1047794 by itstayyab
 function jsonValue() {
-KEY=$1
- /
+ KEY=$1
  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}' | tr -d '"'| tr '\n' ','
 }
 

@@ -3,42 +3,34 @@
 # bash script to query and delete multiple ECFS GCE resources
 
 # set -x
-
-VHEAD_NAME="$1-elfs"
-ZONE=$2
-REGION=${ZONE:0:8}
+EMS_NAME=`terraform show | grep metadata.reference_name | cut -d " " -f 5`
+VHEAD_NAME="$EMS_NAME-elfs"
+ZONE=`terraform show | grep "zone ="| cut -d " " -f 5`
+REGION=${ZONE:0:11}
 SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
 EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
-CLUSTER_NAME="elastifile-guyr"
+#CLUSTER_NAME="elastifile-guyr"
 #delete the vheads
 VMLIST=`gcloud compute instances list --filter="name:$VHEAD_NAME AND zone:$ZONE" | grep $VHEAD_NAME | cut -d " " -f 1`
 for i in $VMLIST; do
-gcloud compute instances delete $i --zone=$ZONE --quiet &
+  gcloud compute instances delete $i --zone=$ZONE --quiet &
 done
 
-if [[ $3 == "true" ]]; then
+#if [[ $3 == "true" ]]; then
   #Establish https session
-  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/sessions 2>&1
+#  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/sessions 2>&1
 
   #grab the LB name
-  LB_NAME="$EMS_ADDRESS-int-lb"
+  LB_NAME="$EMS_NAME-int-lb"
   #LB_NAME=`curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" | grep load_balancer_name | cut -d , -f 7 | cut -d \" -f 4`
 
-  #delete the instance group
-  gcloud compute instance-groups unmanaged delete "$CLUSTER_NAME-$ZONE" --zone=$ZONE --quiet &
 
   #delete the VPC network
-  DEFAULTROUTES=`gcloud compute routes list | grep $LB_NAME | cut -d " " -f 1`
-  for i in $DEFAULTROUTES; do
-  gcloud compute routes delete $i --quiet &
-  done
-  gcloud compute addresses delete "$LB_NAME-ip" --region $REGION --quiet
-  gcloud compute networks subnets delete "$LB_NAME-ip-net-sub" --region $REGION --quiet
-  gcloud compute networks delete "$LB_NAME-ip-net" --quiet
-fi
-
-gcloud compute instances delete $1 --zone=$ZONE --quiet &
+#  DEFAULTROUTES=`gcloud compute routes list | grep $LB_NAME | cut -d " " -f 1`
+#  for i in $DEFAULTROUTES; do
+#  gcloud compute routes delete $i --quiet &
+#  done
 
 exit 0
 # --quiet --no-user-output-enabled

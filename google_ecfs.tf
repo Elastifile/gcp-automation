@@ -71,11 +71,8 @@ variable "DEPLOYMENT_TYPE"{
   default = "dual"
 }
 
-variable "ADD_VHEADS"{
-  default = "0"
-}
-variable "REMOVE_VHEADS"{
-  default = "0"
+variable "OPERATION_TYPE"{
+  default = "none"
 }
 
 provider "google" {
@@ -104,8 +101,8 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     subnetwork = "${var.SUBNETWORK}"
 
     access_config {
-      // Ephemeral IP
-    }
+	      // Ephemeral IP
+	    }
   }
 
   metadata {
@@ -218,21 +215,23 @@ resource "null_resource" "google_ilb" {
   }
 
   depends_on = ["null_resource.cluster"]
-}
-
-resource "null_resource" "add_vheads" {
-  count = "${var.ADD_VHEADS != "0" ? 1 : 0}"
+  
   provisioner "local-exec" {
-    command     = "./add_vheads.sh -n ${var.ADD_VHEADS} -a ${var.USE_PUBLIC_IP}"
+    when        = "destroy"
+    command     = "./destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES}"
     interpreter = ["/bin/bash", "-c"]
   }
-  depends_on = ["null_resource.cluster"]
 }
 
-resource "null_resource" "remove_vheads" {
-  count = "${var.REMOVE_VHEADS != "0" ? 1 : 0}"
+resource "null_resource" "update_cluster" {
+  count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
+  
+  triggers {
+    num_of_vms = "${var.NUM_OF_VMS}"
+  }
+
   provisioner "local-exec" {
-    command     = "./remove_vheads.sh -n ${var.REMOVE_VHEADS} -a ${var.USE_PUBLIC_IP}"
+    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP}"
     interpreter = ["/bin/bash", "-c"]
   }
   depends_on = ["null_resource.cluster"]

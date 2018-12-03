@@ -5,7 +5,7 @@ TEMPLATE_TYPE = "small"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
 # <cpucores>_<ram> default: 4_42
-VM_CONFIG = "4_42"
+VM_CONFIG = "16_96"
 #local,persistent,hdd
 DISK_TYPE = "persistent"
 # <num_of_disks>_<disk_size>
@@ -19,7 +19,7 @@ CLUSTER_NAME = "elastifile-guyr"
 # GCP region
 REGION = "us-central1"
 # GCP zone
-EMS_ZONE = "us-central1-d"
+EMS_ZONE = "us-central1-f"
 # GCP project
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork
@@ -31,10 +31,10 @@ CREDENTIALS = "booming-mission-107807-ba9123136b7f.json"
 SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.com"
 # true false
 USE_PUBLIC_IP = true
-#deployment type - single, dual, multizone
+# deployment type - single, dual, multizone
 DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
-NODES_ZONES = "us-central1-d"
-# add or remove number of vheads
-ADD_VHEADS = "0"
-REMOVE_VHEADS = "0" 
+NODES_ZONES = "us-central1-f"
+# setup comoplete - false for initail deployment, true for add/remove nodes
+SETUP_COMPLETE = "true"
+
