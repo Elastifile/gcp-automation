@@ -1,5 +1,4 @@
 #!/bin/bash
-# destoy_vheads.sh, Andrew Renz, Aug 2018
 # bash script to query and delete multiple ECFS GCE resources
 
 # set -x
@@ -21,16 +20,14 @@ done
   #Establish https session
 #  curl -k -D $SESSION_FILE -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/sessions 2>&1
 
-  #grab the LB name
-  LB_NAME="$EMS_NAME-int-lb"
-  #LB_NAME=`curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" | grep load_balancer_name | cut -d , -f 7 | cut -d \" -f 4`
+#LB_NAME=`curl -k -s -b $SESSION_FILE --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1" | grep load_balancer_name | cut -d , -f 7 | cut -d \" -f 4`
 
 
   #delete the VPC network
-#  DEFAULTROUTES=`gcloud compute routes list | grep $LB_NAME | cut -d " " -f 1`
-#  for i in $DEFAULTROUTES; do
-#  gcloud compute routes delete $i --quiet &
-#  done
+  DEFAULTROUTES=`gcloud compute routes list | grep $EMS_NAME | cut -d " " -f 1`
+  for i in $DEFAULTROUTES; do
+   gcloud compute routes delete $i --quiet &
+  done
 
 exit 0
 # --quiet --no-user-output-enabled
