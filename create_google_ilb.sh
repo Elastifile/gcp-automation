@@ -1,19 +1,5 @@
 #!/bin/bash
-#create vheads.sh, Andrew Renz, Sept 2017, June 2018
-#Script to configure Elastifile EManage (EMS) Server, and deploy cluster of ECFS virtual controllers (vheads) in Google Compute Platform (GCE)
-#Requires terraform to determine EMS address and name (Set EMS_ADDRESS and EMS_NAME to use standalone)
-
 set -ux
-
-#impliment command-line options
-#imported from EMS /elastifile/emanage/deployment/cloud/add_hosts_google.sh
-
-# function code from https://gist.github.com/cjus/1047794 by itstayyab
-function jsonValue() {
-KEY=$1
- awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}' | tr -d '"'| tr '\n' ','
-}
-
 
 usage() {
   cat << E_O_F
@@ -28,17 +14,7 @@ E_O_F
 }
 
 #variables
-#LOGIN=admin
-SESSION_FILE=session.txt
-PASSWORD=`cat password.txt | cut -d " " -f 1`
-SETUP_COMPLETE="false"
-DISKTYPE=local
-NUM_OF_VMS=3
-NUM_OF_DISKS=1
-WEB=https
 LOG="create_google_ilb.log"
-#LOG=/dev/null
-#DISK_SIZE=
 
 while getopts "h?:z:n:s:c:a:" opt; do
     case "$opt" in
@@ -59,14 +35,6 @@ while getopts "h?:z:n:s:c:a:" opt; do
     esac
 done
 
-#capture computed variables
-EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
-EMS_HOSTNAME="${EMS_NAME}.local"
-#if [[ $USE_PUBLIC_IP -eq 1 ]]; then
-#  EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
-#else
-#  EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
-#fi
 REGION=`echo $ZONE | awk -F- '{print $1"-"$2 }'`
 
 echo "REGION: $REGION" | tee ${LOG}

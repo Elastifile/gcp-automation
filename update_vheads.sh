@@ -55,13 +55,25 @@ function establish_session {
 }
 
 function update_vheads {
-  CURRENT_NUM_OF_VMS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//' | awk -F"," '{print NF}')
-  echo "CURRENT_NUM_OF_VMS: ${CURRENT_NUM_OF_VMS}" | tee -a ${LOG}
-  if [[ ${NUM_OF_VMS} > ${CURRENT_NUM_OF_VMS} ]]; then
-    let NUM=${NUM_OF_VMS}-${CURRENT_NUM_OF_VMS}
+  PRE_IPS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//')
+  PRE_NUM_OF_VMS=$(echo $PRE_IPS | awk -F"," '{print NF}')
+  echo "PRE_NUM_OF_VMS: ${PRE_NUM_OF_VMS}" | tee -a ${LOG}
+  if [[ ${NUM_OF_VMS} > ${PRE_NUM_OF_VMS} ]]; then
+    let NUM=${NUM_OF_VMS}-${PRE_NUM_OF_VMS}
     ./add_vheads.sh -n $NUM -a $USE_PUBLIC_IP
+    POST_IPS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//')
+    ADDED_IPS=""
+    for IP in ${POST_IPS//,/ }; do
+      ip_exists=`echo $PRE_IPS | grep $IP`
+      if [[ ${ip_exists} == "" ]]; then
+        ADDED_IPS=$ADDED_IPS","$IP
+      fi
+    done
+    ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
+    echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
+    ./update_google_ilb.sh -a $ADDED_IPS
   else
-    let NUM=${CURRENT_NUM_OF_VMS}-${NUM_OF_VMS}
+    let NUM=${PRE_NUM_OF_VMS}-${NUM_OF_VMS}
     ./remove_vheads.sh -n $NUM -a $USE_PUBLIC_IP
 fi
 }

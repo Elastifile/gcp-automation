@@ -117,8 +117,8 @@ echo "REPLICATION: $REPLICATION" | tee -a ${LOG}
 
 #establish https session
 function establish_session {
-echo -e "Establishing https session..\n" | tee -a ${LOG}
-curl -k -D ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://$EMS_ADDRESS/api/sessions >> ${LOG} 2>&1
+  echo -e "Establishing https session..\n" | tee -a ${LOG}
+  curl -k -D ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://$EMS_ADDRESS/api/sessions >> ${LOG} 2>&1
 }
 
 function first_run {
@@ -178,7 +178,6 @@ function set_storage_type_custom {
 }
 
 function setup_ems {
-  # establish_session changeme
   #accept EULA
   echo -e "\nAccepting EULA.. \n" | tee -a ${LOG}
   curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"id":1}' https://$EMS_ADDRESS/api/systems/1/accept_eula >> ${LOG} 2>&1
@@ -282,19 +281,10 @@ function change_password {
   establish_session $PASSWORD
 }
 
-# terraform variables to store state, unused for now
-PASSWORD_IS_CHANGED=`terraform show | grep metadata.setup_complete | cut -d " " -f 5`
-SETUP_COMPLETE=`terraform show | grep metadata.setup_complete | cut -d " " -f 5`
 
 # Main
-if [ "${PASSWORD_IS_CHANGED}" = "false" ]; then
-  first_run
-fi
-if [ "${SETUP_COMPLETE}" = "false" ]; then
-  setup_ems
-  add_capacity
-  create_data_container
-  change_password
-else
-  add_capacity
-fi
+first_run
+setup_ems
+add_capacity
+create_data_container
+change_password
