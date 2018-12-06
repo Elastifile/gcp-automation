@@ -61,17 +61,19 @@ function update_vheads {
   if [[ ${NUM_OF_VMS} > ${PRE_NUM_OF_VMS} ]]; then
     let NUM=${NUM_OF_VMS}-${PRE_NUM_OF_VMS}
     ./add_vheads.sh -n $NUM -a $USE_PUBLIC_IP
-    POST_IPS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//')
-    ADDED_IPS=""
-    for IP in ${POST_IPS//,/ }; do
-      ip_exists=`echo $PRE_IPS | grep $IP`
-      if [[ ${ip_exists} == "" ]]; then
-        ADDED_IPS=$ADDED_IPS","$IP
+     if [[ $LB_TYPE == "google" ]]; then
+        POST_IPS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//')
+        ADDED_IPS=""
+        for IP in ${POST_IPS//,/ }; do
+          ip_exists=`echo $PRE_IPS | grep $IP`
+          if [[ ${ip_exists} == "" ]]; then
+            ADDED_IPS=$ADDED_IPS","$IP
+          fi
+        done
+        ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
+        echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
+        ./update_google_ilb.sh -a $ADDED_IPS
       fi
-    done
-    ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
-    echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
-    ./update_google_ilb.sh -a $ADDED_IPS
   else
     let NUM=${PRE_NUM_OF_VMS}-${NUM_OF_VMS}
     ./remove_vheads.sh -n $NUM -a $USE_PUBLIC_IP
