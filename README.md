@@ -24,6 +24,7 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - USE_PUBLIC_IP = true/false. true for creating ems with public IP. false for creating ems with private IP only.
 - DEPLOYMENT_TYPE = single, dual, multizone
 - NODES_ZONES = list of the zones for the nodes
+- SETUP_COMPLETE = true or false
 
 3. Run 'terraform init' then 'terraform apply'
 
@@ -41,15 +42,55 @@ Note: REST calls are HTTPS (443) to the public IP of EMS. Ensure GCP project fir
 **destroy_vheads.sh**
 Bash script to query and delete multiple GCE instances and network resources simultaneously. Called as null_provider destroy from google_ecfs.tf
 
+**add_vheads.sh**
+Bash script to query and add multiple GCE instances and network resources simultaneously. Called as script from update_vheads.sh
+
+**remove_vheads.sh**
+Bash script to query and remove multiple GCE instances and network resources simultaneously. Called as script from update_vheads.sh
+
+**update_vheads.sh**
+Bash script to query, add/remove multiple GCE instances, update the google iLB and network resources simultaneously. Called as null_provider from google_ecfs.tf
+
+**create_google_ilb.sh**
+Bash script to create all the neccesary resources for the google iLB simultaneously. Called as null_provider from google_ecfs.tf
+
+**update_google_ilb.sh**
+Bash script to query and change the google iLB configurations after adding/removing nodes. Called as script from update_vheads.sh
+
+**destroy_google_ilb.sh**
+Bash script to query and delete all the google iLB resources simultaneously. Called as null_provider destroy from google_ecfs.tf
+
+
 **password.txt**
 Plaintext file with EMS password
 
 ## Troubleshooting:
-**create_vheads.log**
-Output of REST commands
+** *.log files**
+Output of all scripts and REST commands
 
 **/elastifile/log/**
 Log directory from EMS
 
 ## Known Issues:
 Custom template configurations are not officially supported by Elastifile
+
+## This version supports Elastifile Ver 3.x with the following:
+- Single replication for SSD PD device configurations.
+- Dual replication for all configurations
+- Multizone cluster, needs 3 zones in the same region.
+- Adding and removing nodes from a live cluster, by changing the SETUP_COMPLETE to true, and modifing the NUM_OF_VMS to the requested number.
+- deploying with google iLB, with dynamic support to add/remove nodes.
+- deploying with elastifile LB,  with dynamic support to add/remove nodes.
+- Public IP, true/flase support.
+- Custom configuration of the cluster.
+- Full Destroy 
+
+## This version supports Elastifile Ver 2.7.x with the following:
+- Dual replication for all configurations
+- Adding nodes from a live cluster, by changing the SETUP_COMPLETE to true, and modifing the NUM_OF_VMS to the requested number. 
+*** Removing nodes is not supported for version 2.7.5.x ***
+- deploying with google iLB, with dynamic support to add/remove nodes.
+- deploying with elastifile LB,  with dynamic support to add/remove nodes.
+- Public IP, true/flase support.
+- Custom configuration of the cluster.
+- Full Destroy
