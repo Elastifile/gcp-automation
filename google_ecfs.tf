@@ -231,7 +231,7 @@ resource "null_resource" "update_cluster" {
   }
 
   provisioner "local-exec" {
-    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP}"
+    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP} -l ${var.LB_TYPE}"
     interpreter = ["/bin/bash", "-c"]
   }
   depends_on = ["null_resource.cluster"]

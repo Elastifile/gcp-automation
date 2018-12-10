@@ -13,8 +13,9 @@ Usage:
 Parameters:
   -n number of enode instances (cluster size): eg 3
   -a use public ip (true=1/false=0)
+  -l lb type
 Examples:
-  ./update_vheads.sh -n 2 -a 1
+  ./update_vheads.sh -n 2 -a 1 -l elastifile
 E_O_F
   exit 1
 }
@@ -24,7 +25,7 @@ SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
 LOG="update_vheads.log"
 
-while getopts "h?:n:a:" opt; do
+while getopts "h?:n:a:l:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -33,6 +34,8 @@ while getopts "h?:n:a:" opt; do
     n)  NUM_OF_VMS=${OPTARG}
         ;;
     a)  USE_PUBLIC_IP=${OPTARG}
+        ;;
+    l)  LB_TYPE=${OPTARG}
         ;;
     esac
 done

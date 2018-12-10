@@ -4,7 +4,7 @@ IMAGE = "elastifile-storage-3-0-0-14-ems"
 TEMPLATE_TYPE = "small"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
-# <cpucores>_<ram> default: 4_42
+#<cpucores>_<ram> default: 4_42
 VM_CONFIG = "4_60"
 #local,persistent,hdd
 DISK_TYPE = "persistent"
