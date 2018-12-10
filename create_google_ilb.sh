@@ -64,10 +64,10 @@ function create_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     for zone in ${AVAILABILITY_ZONES//,/ }; do 
       instances=`gcloud compute instances list --filter="zone:($zone)" | grep $CLUSTER_NAME- | awk '{ print $1"," }'`
-      instances=`echo $instances| tr -d ' '`
+      instances=`echo $instances| tr -d ' '|sed s'/[,]$//'`
       instance_group="$CLUSTER_NAME-$zone"
       gcloud compute instance-groups unmanaged create $instance_group  --zone $zone
-      gcloud compute instance-groups unmanaged add-instances $instance_group --instances ${instances::-1} --zone $zone
+      gcloud compute instance-groups unmanaged add-instances $instance_group --instances ${instances} --zone $zone
       gcloud compute backend-services add-backend $CLUSTER_NAME-int-lb --instance-group $instance_group --instance-group-zone $zone --region $REGION
     done
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
