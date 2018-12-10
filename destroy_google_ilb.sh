@@ -64,10 +64,10 @@ function destroy_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     for zone in ${AVAILABILITY_ZONES//,/ }; do
       instances=`gcloud compute instances list --filter="zone:($zone)" | grep $CLUSTER_NAME- | awk '{ print $1"," }'`
-      instances=`echo $instances| tr -d ' '`
+      instances=`echo $instances| tr -d ' '|sed s'/[,]$//'`
       instance_group="$CLUSTER_NAME-$zone"
       gcloud compute backend-services remove-backend $CLUSTER_NAME-int-lb --instance-group $instance_group --instance-group-zone $zone --region $REGION --quiet
-      gcloud compute instance-groups unmanaged remove-instances $instance_group --instances ${instances::-1} --zone $zone --quiet
+      gcloud compute instance-groups unmanaged remove-instances $instance_group --instances ${instances} --zone $zone --quiet
       gcloud compute instance-groups unmanaged delete $instance_group --zone $zone --quiet
     done
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
