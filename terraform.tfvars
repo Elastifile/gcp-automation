@@ -11,7 +11,7 @@ DISK_TYPE = "persistent"
 # <num_of_disks>_<disk_size>
 DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
-LB_TYPE = "google"
+LB_TYPE = "elastifile"
 # numberof nodes to create
 MIN_CLUSTER = "3"
 # instance prefix
