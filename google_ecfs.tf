@@ -210,7 +210,7 @@ resource "null_resource" "cluster" {
 resource "null_resource" "google_ilb" {
   count = "${var.LB_TYPE == "google" ? 1 : 0}"
   provisioner "local-exec" {
-    command     = "./create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES}"
+    command     = "./create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 
@@ -218,7 +218,7 @@ resource "null_resource" "google_ilb" {
   
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES}"
+    command     = "./destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
@@ -231,7 +231,7 @@ resource "null_resource" "update_cluster" {
   }
 
   provisioner "local-exec" {
-    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP} -l ${var.LB_TYPE}"
+    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP} -l ${var.LB_TYPE} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
   depends_on = ["null_resource.cluster"]

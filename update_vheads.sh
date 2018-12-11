@@ -14,8 +14,10 @@ Parameters:
   -n number of enode instances (cluster size): eg 3
   -a use public ip (true=1/false=0)
   -l lb type
+  -e service email
+  -p project
 Examples:
-  ./update_vheads.sh -n 2 -a 1 -l elastifile
+  ./update_vheads.sh -n 2 -a 1 -l elastifile -e <service-account> -p <project id>
 E_O_F
   exit 1
 }
@@ -25,7 +27,7 @@ SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
 LOG="update_vheads.log"
 
-while getopts "h?:n:a:l:" opt; do
+while getopts "h?:n:a:l:e:p:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -37,6 +39,9 @@ while getopts "h?:n:a:l:" opt; do
         ;;
     l)  LB_TYPE=${OPTARG}
         ;;
+    e)  SERVICE_EMAIL=${OPTARG}
+        ;;
+    p)  PROJECT=${OPTARG}
     esac
 done
 
@@ -75,7 +80,7 @@ function update_vheads {
         done
         ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
         echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
-        ./update_google_ilb.sh -a $ADDED_IPS
+        ./update_google_ilb.sh -a $ADDED_IPS -e $SERVICE_EMAIL -p $PROJECT
       fi
   else
     let NUM=${PRE_NUM_OF_VMS}-${NUM_OF_VMS}
