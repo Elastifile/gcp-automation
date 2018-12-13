@@ -1,5 +1,5 @@
 # Elastifile image version
-IMAGE = "elastifile-storage-3-0-0-14-ems"
+IMAGE = "elastifile-storage-3-0-1-4-ems"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "small"
 # number of vheads exlusive of EMS
