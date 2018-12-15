@@ -86,19 +86,16 @@ function job_status {
     echo -e "checking job status" | tee -a ${LOG}
     STATUS=`curl -k -s -b ${SESSION_FILE} --request GET --url "https://${EMS_ADDRESS}/api/control_tasks/$taskid" | grep status | cut -d , -f 7 | cut -d \" -f 4`
     echo -e  "$1 : ${STATUS} " | tee -a ${LOG}
-    if [[ ${STATUS} == "success" ]]; then
+    if [[ ${STATUS} == "" ]]; then
+      establish_session ${PASSWORD}
+      continue
+    elif [[ ${STATUS} == "success" ]]; then
       echo -e "$1 Complete! \n" | tee -a ${LOG}
-      sleep 5
       break
     elif  [[ ${STATUS} == "error" ]]; then
       echo -e "$1 Failed. Exiting..\n" | tee -a ${LOG}
       exit 1
-    else:
-       error_report = jsonValue error
-       echo -e "${error_report}" | tee -a ${LOG}
-       echo -e "$1 Failed. Exiting..\n" | tee -a ${LOG}
-       exit 1
-     fi
+    fi
     sleep 10
   done
 }
