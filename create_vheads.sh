@@ -41,8 +41,6 @@ NUM_OF_VMS=3
 NUM_OF_DISKS=1
 WEB=https
 LOG="create_vheads.log"
-#LOG=/dev/null
-#DISK_SIZE=
 
 while getopts "h?:c:l:t:n:d:v:p:s:a:" opt; do
     case "$opt" in
