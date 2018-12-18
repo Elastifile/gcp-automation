@@ -9,6 +9,9 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 1. Create password.txt file with a password to use for eManage  (.gitignore skips this file)
 2. Specify configuration variables in terraform.tfvars:
 - TEMPLATE_TYPE = small, medium, standard, custom. Only use custom in consultation with Elastifile support
+- COMPANY_NAME = Name of the company that uses this cluster
+- CONTACT_PERSON_NAME = Contact person name
+- EMAIL_ADDRESS = Email address of the contact person
 - NUM_OF_VMS = Number of ECFS virtual controllers, 3 minimum for small/medium, 6 minimum for standard
 - LB_TYPE = none, dns, elastifile, google
 - DISK_TYPE = local, ssd, or hdd. Only applies to custom templates
