@@ -39,7 +39,6 @@ SETUP_COMPLETE="false"
 DISKTYPE=local
 NUM_OF_VMS=3
 NUM_OF_DISKS=1
-WEB=https
 LOG="create_vheads.log"
 
 while getopts "h?:c:l:t:n:d:v:p:s:a:" opt; do
