@@ -23,10 +23,6 @@ E_O_F
 #variables
 SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
-EMS_ADDRESS="127.0.0.1"
-SETUP_COMPLETE="false"
-NUM_OF_VMS=3
-WEB=https
 LOG="remove_vheads.log"
 taskid=0
 
