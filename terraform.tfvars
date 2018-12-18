@@ -1,5 +1,11 @@
 # Elastifile image version
 IMAGE = "elastifile-storage-3-0-1-4-ems"
+# Company name
+COMPANY_NAME = "elastifile"
+# Contact person name - no spaces allowed
+CONTACT_PERSON_NAME = "Guy_Rinkevich"
+# Contact person email address
+EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "small"
 # number of vheads exlusive of EMS
@@ -36,4 +42,4 @@ DEPLOYMENT_TYPE = "multizone"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
 NODES_ZONES = "us-central1-f,us-central1-c,us-central1-d"
 # setup comoplete - false for initail deployment, true for add/remove nodes
-SETUP_COMPLETE = "false"
+SETUP_COMPLETE = "true"

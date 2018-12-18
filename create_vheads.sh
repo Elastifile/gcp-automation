@@ -27,6 +27,10 @@ Usage:
   -p use public IP: "true" "false"
   -s deployment type: "single" "dual" "multizone"
   -a availability zones
+  -e company name
+  -f contact person
+  -g contact person email
+  
 E_O_F
   exit 1
 }
@@ -39,9 +43,12 @@ SETUP_COMPLETE="false"
 DISKTYPE=local
 NUM_OF_VMS=3
 NUM_OF_DISKS=1
+WEB=https
 LOG="create_vheads.log"
+#LOG=/dev/null
+#DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -67,6 +74,12 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:" opt; do
     s)  DEPLOYMENT_TYPE=${OPTARG}
         ;;
     a)  AVAILABILITY_ZONES=${OPTARG}
+        ;;
+    e)  COMPANY_NAME=${OPTARG}
+        ;;
+    f)  CONTACT_PERSON_NAME=${OPTARG}
+        ;;
+    g)  EMAIL_ADDRESS=${OPTARG}
         ;;
     esac
 done
@@ -108,7 +121,9 @@ echo "LB: $LB" | tee -a ${LOG}
 echo "USE_LB: $USE_LB" | tee -a ${LOG}
 echo "DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE" | tee -a ${LOG}
 echo "REPLICATION: $REPLICATION" | tee -a ${LOG}
-
+echo "COMPANY_NAME: $COMPANY_NAME" | tee -a ${LOG}
+echo "CONTACT_PERSON_NAME: $CONTACT_PERSON_NAME" | tee -a ${LOG}
+echo "EMAIL_ADDRESS: $EMAIL_ADDRESS" | tee -a ${LOG}
 
 #set -x
 
@@ -136,7 +151,7 @@ function first_run {
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 function set_storage_type {
   echo -e "Configure systems...\n" | tee -a ${LOG}
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
+  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
   if [[ $1 == "small" ]]; then
     echo -e "Setting storage type $1..." | tee -a ${LOG}
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":4}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1

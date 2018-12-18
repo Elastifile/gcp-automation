@@ -24,6 +24,12 @@ variable "DISK_CONFIG" {
 
 variable "CLUSTER_NAME" {}
 
+variable "COMPANY_NAME" {}
+
+variable "CONTACT_PERSON_NAME" {}
+
+variable "EMAIL_ADDRESS" {}
+
 variable "IMAGE" {}
 
 variable "SETUP_COMPLETE" {
@@ -195,7 +201,7 @@ SCRIPT
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES}"
+    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS}"
     interpreter = ["/bin/bash", "-c"]
   }
 
