@@ -42,4 +42,4 @@ DEPLOYMENT_TYPE = "multizone"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
 NODES_ZONES = "us-central1-f,us-central1-c,us-central1-d"
 # setup comoplete - false for initail deployment, true for add/remove nodes
-SETUP_COMPLETE = "true"
+SETUP_COMPLETE = "false"
