@@ -87,6 +87,7 @@ function job_status {
     STATUS=`curl -k -s -b ${SESSION_FILE} --request GET --url "https://${EMS_ADDRESS}/api/control_tasks/$taskid" | grep status | cut -d , -f 7 | cut -d \" -f 4`
     echo -e  "$1 : ${STATUS} " | tee -a ${LOG}
     if [[ ${STATUS} == "" ]]; then
+      echo -e "$1 Re_establish_session..\n" | tee -a ${LOG}
       establish_session ${PASSWORD}
       continue
     elif [[ ${STATUS} == "success" ]]; then

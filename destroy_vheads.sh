@@ -27,9 +27,14 @@ done
 
 #delete the vheads
 VHEAD_NAME="$CLUSTER_NAME-elfs"
+RA_NAME="$CLUSTER_NAME-ra"
 for zone in ${AVAILABILITY_ZONES//,/ }; do
   VMLIST=`gcloud compute instances list --filter="name:$VHEAD_NAME AND zone:$zone" | grep $VHEAD_NAME | cut -d " " -f 1`
+  RALIST=`gcloud compute instances list --filter="name:$RA_NAME AND zone:$zone" | grep $RA_NAME | cut -d " " -f 1`
     for i in $VMLIST; do
+      gcloud compute instances delete $i --zone=$zone --quiet &
+    done
+    for i in $RALIST; do
       gcloud compute instances delete $i --zone=$zone --quiet &
     done
 done

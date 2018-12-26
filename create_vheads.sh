@@ -30,6 +30,7 @@ Usage:
   -e company name
   -f contact person
   -g contact person email
+  -i clear tier
   
 E_O_F
   exit 1
@@ -48,7 +49,7 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -80,6 +81,8 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:" opt; do
     f)  CONTACT_PERSON_NAME=${OPTARG}
         ;;
     g)  EMAIL_ADDRESS=${OPTARG}
+        ;;
+    i)  ILM=${OPTARG}
         ;;
     esac
 done
@@ -124,6 +127,7 @@ echo "REPLICATION: $REPLICATION" | tee -a ${LOG}
 echo "COMPANY_NAME: $COMPANY_NAME" | tee -a ${LOG}
 echo "CONTACT_PERSON_NAME: $CONTACT_PERSON_NAME" | tee -a ${LOG}
 echo "EMAIL_ADDRESS: $EMAIL_ADDRESS" | tee -a ${LOG}
+echo "ILM: $ILM" | tee -a ${LOG}
 
 #set -x
 
@@ -293,10 +297,17 @@ function change_password {
   establish_session $PASSWORD
 }
 
-
+# Provision  and deploy
+function enable_clear_tier {
+  if [[ $ILM == "true" ]]; then
+    echo -e "auto configuraing clear tier\n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST  https://$EMS_ADDRESS/api/cc_services/auto_setup 
+  fi
+}
 # Main
 first_run
 setup_ems
 add_capacity
+enable_clear_tier
 create_data_container
 change_password

@@ -69,6 +69,9 @@ variable "USE_PUBLIC_IP" {
   default = true
 }
 
+variable "ILM" {
+  default = "false"
+}
 variable "NODES_ZONES" {
   default = "us-central1-a"
 }
@@ -127,15 +130,13 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   metadata_startup_script = <<SCRIPT
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo order_number=GCP-Launcher >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo start_date=18.03.2018 >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo expiration_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo raw_capacity=320T >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo hosts=32 >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo raw_capacity=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo hosts=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo customer_id=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo signature=qcTHRt/gDCi5q8U3F3cte9iwRqY0EBi/7yoGNQ7d3CaSWtOuMoYSz4wYQ8tO >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo YLFdyXCyPQlFPSBIDzpVzo0UitJwzCIazf2ylTNDVZwXi+GchYvNn1znsrM/ >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo gvcNeIC4aTBzdQ7aFFr7ZnVHlAs26OzDKeCF7Q9fsaVaBcljCi4= >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo signature=sO9+j5Q/OPBaB+bMViAITGvN6by8vOYUrxNsOBYWZ4yBNqHj02iqpmqk2oxO XI3voLGhg6f0WW2MStEwxv46ia2iOjMZVCi/ekDL4nioYG3L5Sfzs/NMLI+D vlC36rkOfAkMrjkN9z1bRFNYwHCnXf58TC/W7RM6gimzRqpIz14= >> /elastifile/emanage/lic/license.gcp.lic
 SCRIPT
 
   # specify the GCP project service account to use
@@ -181,15 +182,13 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
   metadata_startup_script = <<SCRIPT
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo order_number=GCP-Launcher >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo start_date=18.03.2018 >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo expiration_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo raw_capacity=320T >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo hosts=32 >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo raw_capacity=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo hosts=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo customer_id=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo signature=qcTHRt/gDCi5q8U3F3cte9iwRqY0EBi/7yoGNQ7d3CaSWtOuMoYSz4wYQ8tO >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo YLFdyXCyPQlFPSBIDzpVzo0UitJwzCIazf2ylTNDVZwXi+GchYvNn1znsrM/ >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo gvcNeIC4aTBzdQ7aFFr7ZnVHlAs26OzDKeCF7Q9fsaVaBcljCi4= >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo signature=sO9+j5Q/OPBaB+bMViAITGvN6by8vOYUrxNsOBYWZ4yBNqHj02iqpmqk2oxO XI3voLGhg6f0WW2MStEwxv46ia2iOjMZVCi/ekDL4nioYG3L5Sfzs/NMLI+D vlC36rkOfAkMrjkN9z1bRFNYwHCnXf58TC/W7RM6gimzRqpIz14= >> /elastifile/emanage/lic/license.gcp.lic
 SCRIPT
 
   # specify the GCP project service account to use
@@ -201,7 +200,7 @@ SCRIPT
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS}"
+    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM}"
     interpreter = ["/bin/bash", "-c"]
   }
 
