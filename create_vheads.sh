@@ -31,6 +31,7 @@ Usage:
   -f contact person
   -g contact person email
   -i clear tier
+  -k async dr
   
 E_O_F
   exit 1
@@ -49,7 +50,7 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -84,6 +85,8 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:" opt; do
         ;;
     i)  ILM=${OPTARG}
         ;;
+    k)  ASYNC_DR=${OPTARG}
+	;;
     esac
 done
 
@@ -128,7 +131,7 @@ echo "COMPANY_NAME: $COMPANY_NAME" | tee -a ${LOG}
 echo "CONTACT_PERSON_NAME: $CONTACT_PERSON_NAME" | tee -a ${LOG}
 echo "EMAIL_ADDRESS: $EMAIL_ADDRESS" | tee -a ${LOG}
 echo "ILM: $ILM" | tee -a ${LOG}
-
+echo "ASYNC_DR: $ASYNC_DR" | tee -a ${LOG}
 #set -x
 
 #establish https session
@@ -297,11 +300,19 @@ function change_password {
   establish_session $PASSWORD
 }
 
-# Provision  and deploy
+# ilm
 function enable_clear_tier {
   if [[ $ILM == "true" ]]; then
     echo -e "auto configuraing clear tier\n"
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST  https://$EMS_ADDRESS/api/cc_services/auto_setup 
+  fi
+}
+
+# asyncdr
+function enable_async_dr {
+  if [[ $ASYNC_DR == "true" ]]; then
+    echo -e "auto configuraing async dr\n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"instances":2,"auto_start":true}' https://$EMS_ADDRESS/api/hosts/create_replication_agent_instance
   fi
 }
 # Main
@@ -311,3 +322,4 @@ add_capacity
 enable_clear_tier
 create_data_container
 change_password
+enable_async_dr

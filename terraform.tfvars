@@ -25,7 +25,7 @@ CLUSTER_NAME = "elastifile-guyr"
 # GCP region
 REGION = "us-central1"
 # GCP zone
-EMS_ZONE = "us-central1-d"
+EMS_ZONE = "us-central1-c"
 # GCP project
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork
@@ -40,8 +40,10 @@ USE_PUBLIC_IP = true
 # deployment type - single, dual, multizone
 DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
-NODES_ZONES = "us-central1-d"
+NODES_ZONES = "us-central1-c"
 # setup comoplete - false for initail deployment, true for add/remove nodes
 SETUP_COMPLETE = "false"
 # Clear Tier - true false
-ILM = "true"
+ILM = "false"
+# AsyncDR - true false
+ASYNC_DR = "false"
