@@ -129,6 +129,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
+    enable-oslogin      = "false"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -181,6 +182,7 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
     disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
+    enable-oslogin      = "false"
   }
 
   metadata_startup_script = <<SCRIPT
