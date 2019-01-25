@@ -1,9 +1,9 @@
 # Elastifile image version
 IMAGE = "elastifile-storage-3-0-1-4-ems"
-# Company name
-COMPANY_NAME = "elastifile"
-# Contact person name - no spaces allowed
-CONTACT_PERSON_NAME = "Guy_Rinkevich"
+# Company name - must be encapsulated with double + single quotes
+COMPANY_NAME = "'elastifile'"
+# Contact person name - must be encapsulated with double + single quotes
+CONTACT_PERSON_NAME = "'Guy Rinkevich'"
 # Contact person email address
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
