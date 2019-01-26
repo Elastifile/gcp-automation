@@ -37,7 +37,7 @@ ip address add ${VIP} dev eth0
 EOF
 
 # add metadata start-up script and create GCP ECMP routes for each enode
-unset ENODES_LIST[0]
+# unset ENODES_LIST[0]
 ENODES_LIST=( "${ENODES_LIST[@]}" )
 declare -p ENODES_LIST
 declare -p ENODES_GCP_LIST
