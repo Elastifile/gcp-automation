@@ -158,7 +158,6 @@ function first_run {
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 function set_storage_type {
   echo -e "Configure systems...\n" | tee -a ${LOG}
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
   if [[ $1 == "small" ]]; then
     echo -e "Setting storage type $1..." | tee -a ${LOG}
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":4}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
@@ -190,7 +189,6 @@ function set_storage_type_custom {
     cpu_cores=`echo $3 | cut -d "_" -f 1`
     ram=`echo $3 | cut -d "_" -f 2`
     echo -e "Configure systems...\n" | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
     echo -e "Setting custom storage type: $type, num of disks: $disks, disk size=$disk_size cpu cores: $cpu_cores, ram: $ram \n" | tee -a ${LOG}
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"name":"legacy","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations >> ${LOG} 2>&1
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":9}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
@@ -209,6 +207,9 @@ function setup_ems {
 
   echo -e "\nValidate project configuration\n" | tee -a ${LOG}
   curl -k -s -b ${SESSION_FILE} --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1/validate" >> ${LOG} 2>&1
+ 
+  echo -e "Configure systems...\n" | tee -a ${LOG}
+  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
 
   if [[ ${NUM_OF_VMS} == 0 ]]; then
     echo -e "0 VMs configured, skipping set storage type.\n"
