@@ -76,6 +76,11 @@ variable "ILM" {
 variable "ASYNC_DR" {
   default = "false"
 }
+
+variable "LB_VIP" {
+  default = "auto"
+}
+
 variable "NODES_ZONES" {
   default = "us-central1-a"
 }
@@ -226,7 +231,7 @@ resource "null_resource" "google_ilb" {
   }
 
   depends_on = ["null_resource.cluster"]
-  
+
   provisioner "local-exec" {
     when        = "destroy"
     command     = "./destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
@@ -236,7 +241,7 @@ resource "null_resource" "google_ilb" {
 
 resource "null_resource" "update_cluster" {
   count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
-  
+
   triggers {
     num_of_vms = "${var.NUM_OF_VMS}"
   }

@@ -47,3 +47,7 @@ SETUP_COMPLETE = "false"
 ILM = "false"
 # AsyncDR - true false
 ASYNC_DR = "false"
+# GCP ECMP LB override
+# provide IP for LB to prevent auto-select
+#LB_VIP = "10.255.255.1"
+LB_VIP = "auto"

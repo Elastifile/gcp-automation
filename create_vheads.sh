@@ -32,7 +32,7 @@ Usage:
   -g contact person email
   -i clear tier
   -k async dr
-  
+  -j lb vip
 E_O_F
   exit 1
 }
@@ -50,7 +50,7 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -86,6 +86,8 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:" opt; do
     i)  ILM=${OPTARG}
         ;;
     k)  ASYNC_DR=${OPTARG}
+        ;;
+    j)  LB_VIP=${OPTARG}
 	;;
     esac
 done
@@ -132,6 +134,7 @@ echo "CONTACT_PERSON_NAME: $CONTACT_PERSON_NAME" | tee -a ${LOG}
 echo "EMAIL_ADDRESS: $EMAIL_ADDRESS" | tee -a ${LOG}
 echo "ILM: $ILM" | tee -a ${LOG}
 echo "ASYNC_DR: $ASYNC_DR" | tee -a ${LOG}
+echo "LB_VIP: $LB_VIP" | tee -a ${LOG}
 #set -x
 
 #establish https session
@@ -207,7 +210,7 @@ function setup_ems {
 
   echo -e "\nValidate project configuration\n" | tee -a ${LOG}
   curl -k -s -b ${SESSION_FILE} --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1/validate" >> ${LOG} 2>&1
- 
+
   echo -e "Configure systems...\n" | tee -a ${LOG}
   curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
 
@@ -240,11 +243,15 @@ function setup_ems {
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"availability_zone_use":false}' https://${EMS_ADDRESS}/api/cloud_providers/1 >> ${LOG} 2>&1
   fi
 
-  if [[ ${USE_LB} = true ]]; then
-    lb_vip=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
-    echo -e "\n lb_vip "${lb_vip}" \n" | tee -a ${LOG}
-    echo -e "\n lb_vip "${lb_vip}" \n"
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${lb_vip}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+  if [[ ${USE_LB} = true && ${LB_VIP} != "auto" ]]; then
+    echo -e "\n LB_VIP "${LB_VIP}" \n" | tee -a ${LOG}
+    echo -e "\n LB_VIP "${LB_VIP}" \n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+  else
+    LB_VIP=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
+    echo -e "\n LB_VIP "${LB_VIP" \n" | tee -a ${LOG}
+    echo -e "\n LB_VIP "${LB_VIP}" \n"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
   fi
 
 }
@@ -305,7 +312,7 @@ function change_password {
 function enable_clear_tier {
   if [[ $ILM == "true" ]]; then
     echo -e "auto configuraing clear tier\n"
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST  https://$EMS_ADDRESS/api/cc_services/auto_setup 
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST  https://$EMS_ADDRESS/api/cc_services/auto_setup
   fi
 }
 
