@@ -1,6 +1,7 @@
 #!/bin/bash
 #############################
 # Must be run from inside EMS
+# Depreciated => 3.1.0.6
 #############################
 set -x
 
