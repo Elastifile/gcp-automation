@@ -249,7 +249,7 @@ function setup_ems {
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
   else
     LB_VIP=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
-    echo -e "\n LB_VIP "${LB_VIP" \n" | tee -a ${LOG}
+    echo -e "\n LB_VIP "${LB_VIP}" \n" | tee -a ${LOG}
     echo -e "\n LB_VIP "${LB_VIP}" \n"
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
   fi
