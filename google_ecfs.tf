@@ -47,6 +47,7 @@ variable "PASSWORD" {
 variable "REGION" {
   default = "us-central1"
 }
+
 variable "EMS_ZONE" {
   default = "us-central1-a"
 }
@@ -72,15 +73,16 @@ variable "USE_PUBLIC_IP" {
 variable "ILM" {
   default = "false"
 }
+
 variable "NODES_ZONES" {
   default = "us-central1-a"
 }
 
-variable "DEPLOYMENT_TYPE"{
+variable "DEPLOYMENT_TYPE" {
   default = "dual"
 }
 
-variable "OPERATION_TYPE"{
+variable "OPERATION_TYPE" {
   default = "none"
 }
 
@@ -110,8 +112,8 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     subnetwork = "${var.SUBNETWORK}"
 
     access_config {
-	      // Ephemeral IP
-	    }
+      // Ephemeral IP
+    }
   }
 
   metadata {
@@ -200,7 +202,7 @@ SCRIPT
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "./create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM}"
+    command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM}"
     interpreter = ["/bin/bash", "-c"]
   }
 
@@ -208,36 +210,39 @@ resource "null_resource" "cluster" {
 
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_vheads.sh -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES}"
+    command     = "${path.module}/destroy_vheads.sh -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
+
 resource "null_resource" "google_ilb" {
   count = "${var.LB_TYPE == "google" ? 1 : 0}"
+
   provisioner "local-exec" {
-    command     = "./create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
+    command     = "${path.module}/create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 
   depends_on = ["null_resource.cluster"]
-  
+
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "./destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
+    command     = "${path.module}/destroy_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 }
 
 resource "null_resource" "update_cluster" {
   count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
-  
+
   triggers {
     num_of_vms = "${var.NUM_OF_VMS}"
   }
 
   provisioner "local-exec" {
-    command     = "./update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP} -l ${var.LB_TYPE} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
+    command     = "${path.module}/update_vheads.sh -n ${var.NUM_OF_VMS} -a ${var.USE_PUBLIC_IP} -l ${var.LB_TYPE} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
+
   depends_on = ["null_resource.cluster"]
 }
