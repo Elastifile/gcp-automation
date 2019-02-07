@@ -24,7 +24,8 @@ Usage:
   -n number of vhead instances (cluster size): eg 3
   -d disk config: eg 8_375
   -v vm config: eg 4_42
-  -p use public IP: "true" "false"
+  -p IP address
+  -r cluster name
   -s deployment type: "single" "dual" "multizone"
   -a availability zones
   -e company name
@@ -51,7 +52,7 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:r:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -72,7 +73,7 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:" opt; do
         ;;
     v)  VM_CONFIG=${OPTARG}
         ;;
-    p)  USE_PUBLIC_IP=${OPTARG}
+    p)  EMS_ADDRESS=${OPTARG}
         ;;
     s)  DEPLOYMENT_TYPE=${OPTARG}
         ;;
@@ -92,17 +93,13 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:" opt; do
 	      ;;
     b)  DATA_CONTAINER=${OPTARG}
         ;;
+    r)  EMS_NAME=${OPTARG}
+        ;;
     esac
 done
 
 #capture computed variables
-EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
 EMS_HOSTNAME="${EMS_NAME}.local"
-if [[ $USE_PUBLIC_IP -eq 1 ]]; then
-  EMS_ADDRESS=`terraform show | grep 0.nat_ip | cut -d " " -f 5`
-else
-  EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
-fi
 
 # load balancer mode
 if [[ $LB == "elastifile" ]]; then

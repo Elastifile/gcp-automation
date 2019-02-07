@@ -9,6 +9,7 @@ Usage:
   -a list of node ips
   -e service email
   -p project
+  -r cluster name
   example: update_google_ilb.sh -a 10.0.0.1,10.0.0.2 -e <service account> -p <project id>
 E_O_F
   exit 1
@@ -16,8 +17,7 @@ E_O_F
 
 #variables
 LOG="update_google_ilb.log"
-CLUSTER_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
-while getopts "h?:a:e:p:" opt; do
+while getopts "h?:a:e:p:r:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -28,6 +28,8 @@ while getopts "h?:a:e:p:" opt; do
     e)  SERVICE_EMAIL=${OPTARG}
         ;;
     p)  PROJECT=${OPTARG}
+        ;;
+    r)  CLUSTER_NAME=${OPTARG}
         ;;
     esac
 done
