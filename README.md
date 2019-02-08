@@ -29,6 +29,7 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - NODES_ZONES = list of the zones for the nodes
 - SETUP_COMPLETE = true or false
 - ILM = true or false
+- AsyncDR = true or false
 
 3. Run 'terraform init' then 'terraform apply'
 
@@ -90,6 +91,7 @@ Shared VPC configuration is partially supported, and will cot configure the Elas
 - Custom configuration of the cluster.
 - Full Destroy 
 - ILM configuration
+- AsyncDR configuration
 
 ## This version supports Elastifile Ver 2.7.x with the following:
 - Dual replication for all configurations

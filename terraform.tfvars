@@ -1,13 +1,13 @@
 # Elastifile image version
 IMAGE = "elastifile-storage-3-0-1-4-ems"
-# Company name
+# Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
-# Contact person name - no spaces allowed
+# Contact person name - No spaces allowed
 CONTACT_PERSON_NAME = "Guy_Rinkevich"
 # Contact person email address
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
-TEMPLATE_TYPE = "small"
+TEMPLATE_TYPE = "large"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
 #<cpucores>_<ram> default: 4_42
@@ -44,4 +44,10 @@ NODES_ZONES = "us-central1-d"
 # setup comoplete - false for initail deployment, true for add/remove nodes
 SETUP_COMPLETE = "false"
 # Clear Tier - true false
-ILM = "true"
+ILM = "false"
+# AsyncDR - true false
+ASYNC_DR = "false"
+# GCP ECMP LB override
+# provide IP for LB to prevent auto-select
+#LB_VIP = "10.255.255.1"
+LB_VIP = "auto"

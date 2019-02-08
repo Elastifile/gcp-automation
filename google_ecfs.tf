@@ -74,6 +74,14 @@ variable "ILM" {
   default = "false"
 }
 
+variable "ASYNC_DR" {
+  default = "false"
+}
+
+variable "LB_VIP" {
+  default = "auto"
+}
+
 variable "NODES_ZONES" {
   default = "us-central1-a"
 }
@@ -127,6 +135,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
+    enable-oslogin      = "false"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -179,6 +188,7 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
     disk_config         = "${var.DISK_CONFIG}"
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
+    enable-oslogin      = "false"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -202,7 +212,7 @@ SCRIPT
 
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM}"
+    command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${var.USE_PUBLIC_IP} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${var.LB_VIP}"
     interpreter = ["/bin/bash", "-c"]
   }
 
