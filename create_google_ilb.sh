@@ -83,7 +83,8 @@ function create_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo "Configure a firewall rule to allow Internal load balancing"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    gcloud compute firewall-rules create $CLUSTER_NAME-allow-internal-lb --network $NETWORK --source-ranges 10.128.0.0/20 --target-tags elastifile-storage-node --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
+    cidr_range=$(gcloud compute networks subnets describe $SUBNETWORK --region $REGION --format="value(ipCidrRange)")
+    gcloud compute firewall-rules create $CLUSTER_NAME-allow-internal-lb --network $NETWORK --source-ranges $cidr_range --target-tags elastifile-storage-node --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
     gcloud compute firewall-rules create $CLUSTER_NAME-allow-health-check --network $NETWORK --source-ranges 130.211.0.0/22,35.191.0.0/16 --target-tags elastifile-storage-node --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
     echo "Checking load balancer IP:"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
