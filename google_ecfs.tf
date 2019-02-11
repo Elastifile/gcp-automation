@@ -62,7 +62,14 @@ variable "SUBNETWORK" {
 
 variable "PROJECT" {}
 
-variable "CREDENTIALS" {}
+variable "CREDENTIALS" {
+  default = ""
+}
+
+locals {
+  # Conditionals in terraform are eagerly evaluated. So we set default to dummy value we can check against
+  CREDENTIALS = "${ var.CREDENTIALS == "" ? "${path.module}/blank-credentials" : var.CREDENTIALS }"
+}
 
 variable "SERVICE_EMAIL" {}
 
@@ -99,7 +106,7 @@ variable "OPERATION_TYPE" {
 }
 
 provider "google" {
-  credentials = "${file("${var.CREDENTIALS}")}"
+  credentials = "${local.CREDENTIALS == "${path.module}/blank-credentials" ? "" : file("${local.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
   region      = "${var.EMS_ZONE}"
 }
