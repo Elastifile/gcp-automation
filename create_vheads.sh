@@ -306,11 +306,13 @@ function add_capacity {
 }
 
 function change_password {
-  echo -e "Updating password...\n" | tee -a ${LOG}
-  #update ems password
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> ${LOG} 2>&1
-  echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a ${LOG}
-  establish_session $PASSWORD
+  if [[ "x$PASSWORD" != "x" ]]; then
+    echo -e "Updating password...\n" | tee -a ${LOG}
+    #update ems password
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"user":{"id":1,"login":"admin","first_name":"Super","email":"admin@example.com","current_password":"changeme","password":"'$PASSWORD'","password_confirmation":"'$PASSWORD'"}}' https://$EMS_ADDRESS/api/users/1 >> ${LOG} 2>&1
+    echo -e  "Establish new https session using updated PASSWORD...\n" | tee -a ${LOG}
+    establish_session $PASSWORD
+  fi
 }
 
 # ilm
