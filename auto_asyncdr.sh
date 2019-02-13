@@ -15,7 +15,6 @@ PASSWORD_ECFS_S="changeme"
 RPO="5"
 SNAP_RETENTION="2"
 DC_NAME="dc"
-SNAPSHOT_P="snap"
 LOG="asyncdr-auto.log"
 PROMOTE_SLAVE_DC="false"
 
