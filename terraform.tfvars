@@ -51,3 +51,5 @@ ASYNC_DR = "false"
 # provide IP for LB to prevent auto-select
 #LB_VIP = "10.255.255.1"
 LB_VIP = "auto"
+# Data Container name
+DATA_CONTAINER = "DC01"
