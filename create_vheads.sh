@@ -99,7 +99,7 @@ done
 EMS_NAME=`terraform show | grep reference_name | cut -d " " -f 5`
 EMS_HOSTNAME="${EMS_NAME}.local"
 if [[ $USE_PUBLIC_IP -eq 1 ]]; then
-  EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
+  EMS_ADDRESS=`terraform show | grep 0.nat_ip | cut -d " " -f 5`
 else
   EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
 fi
