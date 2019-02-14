@@ -215,14 +215,13 @@ SCRIPT
 }
 
 locals {
-  public_ip = "${element(concat(google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.access_config.0.assigned_nat_ip, list("")), 0)}"
+  public_ip = "${element(concat(google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.access_config.0.nat_ip, list("")), 0)}"
   private_ip = "${element(concat(google_compute_instance.Elastifile-EMS-Private.*.network_interface.0.network_ip , list("")), 0)}"
   ems_address = "${var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
 }
-
 resource "null_resource" "cluster" {
   provisioner "local-exec" {
-    command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -r ${var.CLUSTER_NAME} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${var.LB_VIP} -b ${var.DATA_CONTAINER}"
+     command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${var.LB_VIP} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
     interpreter = ["/bin/bash", "-c"]
   }
 
