@@ -13,7 +13,7 @@ usage() {
 Usage:
 Parameters:
   -n number of enode instances (cluster size): eg 3
-  -a use public ip (true=1/false=0)
+  -a IP address
 Examples:
   ./add_vheads.sh -n 2 -a 1
 E_O_F
@@ -38,17 +38,10 @@ while getopts "h?:n:a:" opt; do
         ;;
     n)  NUM_OF_VMS=${OPTARG}
         ;;
-    a)  USE_PUBLIC_IP=${OPTARG}
+    a)  EMS_ADDRESS=${OPTARG}
         ;;
     esac
 done
-
-#capture computed variables
-if [[ ${USE_PUBLIC_IP} -eq 1 ]]; then
-  EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
-else
-  EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
-fi
 
 #capture computed variables
 echo "EMS_ADDRESS: ${EMS_ADDRESS}" | tee ${LOG}

@@ -48,6 +48,8 @@ echo "ZONE: $ZONE" | tee -a ${LOG}
 echo "NETWORK: $NETWORK" | tee -a ${LOG}
 echo "SUBNETWORK: $SUBNETWORK" | tee -a ${LOG}
 echo "CLUSTER_NAME: $CLUSTER_NAME" | tee -a ${LOG}
+echo "SERVICE_EMAIL: $SERVICE_EMAIL" | tee -a ${LOG}
+echo "PROJECT: $PROJECT" | tee -a ${LOG}
 #set -x
 
 # Configure Google Internal Load Balancer

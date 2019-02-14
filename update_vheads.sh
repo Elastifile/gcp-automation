@@ -12,7 +12,7 @@ usage() {
 Usage:
 Parameters:
   -n number of enode instances (cluster size): eg 3
-  -a use public ip (true=1/false=0)
+  -a IP address
   -l lb type
   -e service email
   -p project
@@ -27,7 +27,7 @@ SESSION_FILE=session.txt
 PASSWORD=`cat password.txt | cut -d " " -f 1`
 LOG="update_vheads.log"
 
-while getopts "h?:n:a:l:e:p:" opt; do
+while getopts "h?:n:a:l:e:p:ir:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -35,22 +35,18 @@ while getopts "h?:n:a:l:e:p:" opt; do
         ;;
     n)  NUM_OF_VMS=${OPTARG}
         ;;
-    a)  USE_PUBLIC_IP=${OPTARG}
+    a)  EMS_ADDRESS=${OPTARG}
         ;;
     l)  LB_TYPE=${OPTARG}
         ;;
     e)  SERVICE_EMAIL=${OPTARG}
         ;;
     p)  PROJECT=${OPTARG}
+        ;;
+    r)  CLUSTER_NAME=${OPTARG}
+        ;;
     esac
 done
-
-#capture computed variables
-if [[ ${USE_PUBLIC_IP} -eq 1 ]]; then
-  EMS_ADDRESS=`terraform show | grep assigned_nat_ip | cut -d " " -f 5`
-else
-  EMS_ADDRESS=`terraform show | grep network_ip | cut -d " " -f 5`
-fi
 
 #capture computed variables
 echo "EMS_ADDRESS: ${EMS_ADDRESS}" | tee ${LOG}
@@ -68,7 +64,7 @@ function update_vheads {
   echo "PRE_NUM_OF_VMS: ${PRE_NUM_OF_VMS}" | tee -a ${LOG}
   if [[ ${NUM_OF_VMS} > ${PRE_NUM_OF_VMS} ]]; then
     let NUM=${NUM_OF_VMS}-${PRE_NUM_OF_VMS}
-    ./add_vheads.sh -n $NUM -a $USE_PUBLIC_IP
+    ./add_vheads.sh -n $NUM -a $EMS_ADDRESS
      if [[ $LB_TYPE == "google" ]]; then
         POST_IPS=$(curl -k -b ./session.txt -H "Content-Type: application/json" https://${EMS_ADDRESS}/api/enodes/ 2> /dev/null | jsonValue external_ip | sed s'/[,]$//')
         ADDED_IPS=""
@@ -80,11 +76,11 @@ function update_vheads {
         done
         ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
         echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
-        ./update_google_ilb.sh -a $ADDED_IPS -e $SERVICE_EMAIL -p $PROJECT
+        ./update_google_ilb.sh -a $ADDED_IPS -e $SERVICE_EMAIL -p $PROJECT -r $CLUSTER_NAME
       fi
   else
     let NUM=${PRE_NUM_OF_VMS}-${NUM_OF_VMS}
-    ./remove_vheads.sh -n $NUM -a $USE_PUBLIC_IP
+    ./remove_vheads.sh -n $NUM -a $EMS_ADDRESS
 fi
 }
 
