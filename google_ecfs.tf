@@ -112,6 +112,12 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
 
   tags = ["https-server"]
 
+  labels = [
+	{
+        "cluster-hash"="${var.CLUSTER_NAME}"
+	}
+  ]
+
   boot_disk {
     initialize_params {
       image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
@@ -168,6 +174,12 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
   zone         = "${var.EMS_ZONE}"
 
   tags = ["https-server"]
+
+labels = [
+        {
+        "cluster-hash"="${var.CLUSTER_NAME}"
+        }
+  ]
 
   boot_disk {
     initialize_params {
