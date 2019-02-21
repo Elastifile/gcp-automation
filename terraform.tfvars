@@ -41,7 +41,7 @@ USE_PUBLIC_IP = true
 DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
 NODES_ZONES = "us-central1-f"
-# setup comoplete - false for initail deployment, true for add/remove nodes
+# setup complete - false for initial deployment, true for add/remove nodes
 SETUP_COMPLETE = "false"
 # Clear Tier - true false
 ILM = "false"
