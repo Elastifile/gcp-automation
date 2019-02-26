@@ -1,5 +1,5 @@
 # Elastifile image version
-IMAGE = "elastifile-storage-3-1-0-10-ems"
+IMAGE = "elastifile-storage-3-1-0-12-ems"
 # Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
 # Contact person name - No spaces allowed
