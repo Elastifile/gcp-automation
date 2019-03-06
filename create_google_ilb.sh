@@ -11,6 +11,7 @@ Usage:
   -a availability zones
   -e account email
   -p project
+  -v vip
 E_O_F
   exit 1
 }
@@ -18,7 +19,7 @@ E_O_F
 #variables
 LOG="create_google_ilb.log"
 
-while getopts "h?:z:n:s:c:a:e:p:" opt; do
+while getopts "h?:z:n:s:c:a:e:p:v:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -38,6 +39,8 @@ while getopts "h?:z:n:s:c:a:e:p:" opt; do
         ;;
     p)  PROJECT=${OPTARG}
         ;;
+    v) VIP=${OPTARG}
+        ;;
     esac
 done
 
@@ -50,6 +53,7 @@ echo "SUBNETWORK: $SUBNETWORK" | tee -a ${LOG}
 echo "CLUSTER_NAME: $CLUSTER_NAME" | tee -a ${LOG}
 echo "SERVICE_EMAIL: $SERVICE_EMAIL" | tee -a ${LOG}
 echo "PROJECT: $PROJECT" | tee -a ${LOG}
+echo "VIP: $VIP" | tee -a ${LOG}
 #set -x
 
 # Configure Google Internal Load Balancer
@@ -81,13 +85,17 @@ function create_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo "Creating a forwarding rule"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    gcloud compute forwarding-rules create $CLUSTER_NAME-int-lb-forwarding-rule --load-balancing-scheme internal --ports 111,2049,644,4040,4045 --network $NETWORK --subnet $SUBNETWORK --region $REGION --backend-service $CLUSTER_NAME-int-lb --account=$SERVICE_EMAIL --project=$PROJECT
+    if [[ ${VIP} == "auto" ]]; then
+        gcloud compute forwarding-rules create $CLUSTER_NAME-int-lb-forwarding-rule --load-balancing-scheme internal --ports 111,2049,644,4040,4045 --network $NETWORK --subnet $SUBNETWORK --region $REGION --backend-service $CLUSTER_NAME-int-lb --account=$SERVICE_EMAIL --project=$PROJECT
+    else
+	gcloud compute forwarding-rules create $CLUSTER_NAME-int-lb-forwarding-rule --load-balancing-scheme internal --ports 111,2049,644,4040,4045 --network $NETWORK --subnet $SUBNETWORK --region $REGION --address=$VIP --backend-service $CLUSTER_NAME-int-lb --account=$SERVICE_EMAIL --project=$PROJECT
+    fi
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo "Configure a firewall rule to allow Internal load balancing"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     cidr_range=$(gcloud compute networks subnets describe $SUBNETWORK --region $REGION --format="value(ipCidrRange)")
-    gcloud compute firewall-rules create $CLUSTER_NAME-allow-internal-lb --network $NETWORK --source-ranges $cidr_range --target-tags elastifile-storage-node --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
-    gcloud compute firewall-rules create $CLUSTER_NAME-allow-health-check --network $NETWORK --source-ranges 130.211.0.0/22,35.191.0.0/16 --target-tags elastifile-storage-node --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
+    gcloud compute firewall-rules create $CLUSTER_NAME-allow-internal-lb --network $NETWORK --source-ranges $cidr_range --target-tags elastifile-storage-node-$CLUSTER_NAME --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
+    gcloud compute firewall-rules create $CLUSTER_NAME-allow-health-check --network $NETWORK --source-ranges 130.211.0.0/22,35.191.0.0/16 --target-tags elastifile-storage-node-$CLUSTER_NAME --allow tcp --account=$SERVICE_EMAIL --project=$PROJECT
     echo "Checking load balancer IP:"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     sleep 10

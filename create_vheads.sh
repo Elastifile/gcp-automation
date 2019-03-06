@@ -214,7 +214,7 @@ function setup_ems {
   curl -k -s -b ${SESSION_FILE} --request GET --url "https://$EMS_ADDRESS/api/cloud_providers/1/validate" >> ${LOG} 2>&1
 
   echo -e "Configure systems...\n" | tee -a ${LOG}
-  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"name_server":"'$EMS_HOSTNAME'","eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
+  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"name":"'$EMS_NAME'","replication_level":'$REPLICATION',"show_wizard":false,"eula":true,"registration_info":{"company_name":"'$COMPANY_NAME'","contact_person_name":"'$CONTACT_PERSON_NAME'","email_address":"'$EMAIL_ADDRESS'","receive_marketing_updates":false}}' https://$EMS_ADDRESS/api/systems/1 >> ${LOG} 2>&1
 
   if [[ ${NUM_OF_VMS} == 0 ]]; then
     echo -e "0 VMs configured, skipping set storage type.\n"
@@ -245,15 +245,17 @@ function setup_ems {
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"availability_zone_use":false}' https://${EMS_ADDRESS}/api/cloud_providers/1 >> ${LOG} 2>&1
   fi
 
-  if [[ ${USE_LB} = true && ${LB_VIP} != "auto" ]]; then
+  if [[ ${LB_VIP} != "auto" ]]; then
     echo -e "\n LB_VIP "${LB_VIP}" \n" | tee -a ${LOG}
     echo -e "\n LB_VIP "${LB_VIP}" \n"
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  else
+  elif [[ ${USE_LB} = true && ${LB_VIP} == "auto" ]]; then
     LB_VIP=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/cloud_providers/1/lb_vip"  | jsonValue vip | sed s'/[,]$//')
     echo -e "\n LB_VIP "${LB_VIP}" \n" | tee -a ${LOG}
     echo -e "\n LB_VIP "${LB_VIP}" \n"
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"load_balancer_vip":"'${LB_VIP}'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+  else
+    echo -e "\n DNS mode \n" | tee -a ${LOG}
   fi
 
 }

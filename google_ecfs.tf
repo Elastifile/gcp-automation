@@ -86,6 +86,10 @@ variable "DATA_CONTAINER" {
   default = "DC01"
 }
 
+variable "EMS_ONLY" {
+  default = "false"
+}
+
 variable "NODES_ZONES" {
   default = "us-central1-a"
 }
@@ -232,6 +236,7 @@ locals {
   ems_address = "${var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
 }
 resource "null_resource" "cluster" {
+  count = "${var.EMS_ONLY == "false" ? 1 : 0}"
   provisioner "local-exec" {
      command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${var.LB_VIP} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
     interpreter = ["/bin/bash", "-c"]
@@ -247,10 +252,10 @@ resource "null_resource" "cluster" {
 }
 
 resource "null_resource" "google_ilb" {
-  count = "${var.LB_TYPE == "google" ? 1 : 0}"
+  count = "${var.LB_TYPE == "google" && var.EMS_ONLY == "false" ? 1 : 0}"
 
   provisioner "local-exec" {
-    command     = "${path.module}/create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT}"
+    command     = "${path.module}/create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT} -v ${var.LB_VIP}"
     interpreter = ["/bin/bash", "-c"]
   }
 
