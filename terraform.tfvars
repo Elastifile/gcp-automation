@@ -17,7 +17,7 @@ DISK_TYPE = "persistent"
 # <num_of_disks>_<disk_size>
 DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
-LB_TYPE = "google"
+LB_TYPE = "elastifile"
 # numberof nodes to create
 MIN_CLUSTER = "3"
 # instance prefix
@@ -38,9 +38,9 @@ SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.co
 # true false
 USE_PUBLIC_IP = true
 # deployment type - single, dual, multizone
-DEPLOYMENT_TYPE = "multizone"
+DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
-NODES_ZONES = "us-central1-f,us-central1-c,us-central1-d"
+NODES_ZONES = "us-central1-f"
 # setup complete - false for initial deployment, true for add/remove nodes
 SETUP_COMPLETE = "false"
 # Clear Tier - true false
@@ -49,8 +49,8 @@ ILM = "false"
 ASYNC_DR = "false"
 # GCP ECMP LB override
 # provide IP for LB to prevent auto-select
-LB_VIP = "10.128.11.99"
-#LB_VIP = "auto"
+#LB_VIP = "10.128.11.99"
+LB_VIP = "auto"
 # Data Container name
 DATA_CONTAINER = "DC01"
 #create EMS only
