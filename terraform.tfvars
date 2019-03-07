@@ -7,9 +7,9 @@ CONTACT_PERSON_NAME = "Guy_Rinkevich"
 # Contact person email address
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
-TEMPLATE_TYPE = "medium"
+TEMPLATE_TYPE = "large"
 # number of vheads exlusive of EMS
-NUM_OF_VMS = "3"
+NUM_OF_VMS = "4"
 #<cpucores>_<ram> default: 4_42
 VM_CONFIG = "4_60"
 #local,persistent,hdd
@@ -18,8 +18,6 @@ DISK_TYPE = "persistent"
 DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
 LB_TYPE = "elastifile"
-# numberof nodes to create
-MIN_CLUSTER = "3"
 # instance prefix
 CLUSTER_NAME = "elastifile-guyr"
 # GCP region
@@ -54,4 +52,6 @@ LB_VIP = "auto"
 # Data Container name
 DATA_CONTAINER = "DC01"
 #create EMS only
-EMS_ONLY="false"
+EMS_ONLY = "false"
+#kms - customer managed encryption key
+KMS_KEY = ""
