@@ -126,7 +126,7 @@ resource "google_compute_address" "google-ilb-static-vip" {
 }
 
 # -------------------------------------------------
-#  Create Boot Disk with Customer Managed Keys
+#  Create Boot Disk with Google or Customer Managed Keys
 # -------------------------------------------------
 
 resource "google_compute_disk" "ems-encrypted-boot-disk" {
@@ -147,6 +147,10 @@ resource "google_compute_disk" "ems-boot-disk" {
   size  = "100"
   image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
 }
+
+# -------------------------------------------------
+#  Create Public/Private EMS
+# -------------------------------------------------
 
 resource "google_compute_instance" "Elastifile-EMS-Public" {
   count        = "${var.USE_PUBLIC_IP}"
