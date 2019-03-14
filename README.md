@@ -106,6 +106,7 @@ Shared VPC configuration is partially supported, and will cot configure the Elas
         - We will automatically alocate a static IP within the subnet for the iLB
   - none, is used when you don't have enough credentials to configure the LB at the moment, and you will perform it after deployemnt. if you plan to configure the LB later on, use the following:
         - LB_VIP: auto or a static IP address from outside the subnet.
+- There is an otption to use encrypted customer managed key for the EMS boot disk.
 
 
 ## This version supports Elastifile Ver 2.7.x with the following:
