@@ -30,6 +30,10 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 - SETUP_COMPLETE = true or false
 - ILM = true or false
 - AsyncDR = true or false
+- LB_VIP = IP Address outside the subnet or auto - for elastifile LB only
+- DATA_CONTAINER = data container name
+- EMS_ONLY = true or false
+- KMS_KEY = the encrypted customer managed keys for the ems boot disk
 
 3. Run 'terraform init' then 'terraform apply'
 
@@ -92,6 +96,17 @@ Shared VPC configuration is partially supported, and will cot configure the Elas
 - Full Destroy 
 - ILM configuration
 - AsyncDR configuration
+- The ability to run a deployment in 2 steps when needed, first creating the EMS (changing the deployment configurations...) and then resuming to full deployment.
+- There are 3 option of LB
+  - Elastifile LB, for this option use the following:
+        - LB_Type: elastifile
+        - LB_VIP: auto or a static IP address from outside the subnet.
+  - Google iLB, for this option use the following:
+        - LB_Type: google
+        - We will automatically alocate a static IP within the subnet for the iLB
+  - none, is used when you don't have enough credentials to configure the LB at the moment, and you will perform it after deployemnt. if you plan to configure the LB later on, use the following:
+        - LB_VIP: auto or a static IP address from outside the subnet.
+
 
 ## This version supports Elastifile Ver 2.7.x with the following:
 - Dual replication for all configurations
