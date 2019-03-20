@@ -32,7 +32,7 @@ Usage:
   -g rpo
   -i snapshot retention
   -j dc name
-  -k mode: "site-pairing" "dc-pairing" "grace" "non-grace" "fail-back" "restore-primary"
+  -k mode: "site-pairing" "dc-pairing" "grace" "non-grace" "fail-back" "restore-primary" "get-pairing-status"
 E_O_F
   exit 1
 }
@@ -171,6 +171,26 @@ function fail_back {
     fi
 }
 
+function pairing_state {
+    if [[ $MODE == "get-pairing-status" ]]; then
+        # Check the dc primary
+        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        # Check the connection status
+        echo -e "\nConnection state of the Primary site.. \n" | tee -a ${LOG}
+        curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
+        echo -e "\nReplication statecof the Primary site.. \n" | tee -a ${LOG}
+        curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
+        # Check the dc secondary
+        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        # Check the connection status
+        echo -e "\nConnection state of the Secondary site.. \n" | tee -a ${LOG}
+        curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
+        echo -e "\nReplication state of the Secondary site.. \n" | tee -a ${LOG}
+        curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
+
+    fi
+}
+
 # Main
 establish_session
 site_pairing
@@ -179,3 +199,4 @@ non_graceful_failover
 graceful_failover
 restore_primary
 fail_back
+pairing_state
