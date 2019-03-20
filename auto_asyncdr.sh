@@ -90,6 +90,7 @@ function dc_pairing {
         # Check the dc ID
         dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
         # Sync data containers
+	pair_id="$(curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/remote_sites|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
         curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"dc_pair":{"remote_site_id":"'$pair_id'","rpo":"'$RPO'","snapshots_retention":"'$SNAP_RETENTION'","dr_role":"role_dc_active"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs
         sleep 20
         remote_dc_pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"remote_dc_pair_uuid"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
