@@ -333,7 +333,7 @@ function enable_async_dr {
 first_run
 setup_ems
 add_capacity
-enable_clear_tier
 create_data_container
 change_password
 enable_async_dr
+enable_clear_tier
