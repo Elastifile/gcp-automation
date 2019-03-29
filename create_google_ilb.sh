@@ -75,7 +75,7 @@ function create_google_ilb {
     echo "Adding int-lb tag to all cluster instances"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     for zone in ${AVAILABILITY_ZONES//,/ }; do 
-      instances=`gcloud compute instances list --filter="zone:($zone)" --account=$SERVICE_EMAIL --project=$PROJECT | grep $CLUSTER_NAME- | awk '{ print $1"," }'`
+      instances=`gcloud compute instances list --filter="zone:($zone)" --account=$SERVICE_EMAIL --project=$PROJECT | grep $CLUSTER_NAME-elfs | awk '{ print $1"," }'`
       instances=`echo $instances| tr -d ' '|sed s'/[,]$//'`
       instance_group="$CLUSTER_NAME-$zone"
       gcloud compute instance-groups unmanaged create $instance_group  --zone $zone --account=$SERVICE_EMAIL --project=$PROJECT
