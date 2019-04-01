@@ -122,7 +122,8 @@ resource "google_compute_address" "google-ilb-static-vip" {
   count = "${var.LB_TYPE == "google" ? 1 : 0}"
   name         = "google-ilb-static-vip"
   address_type = "INTERNAL"
-  subnetwork   = "https://www.googleapis.com/compute/v1/projects/${var.PROJECT}/regions/${var.REGION}/subnetworks/${var.SUBNETWORK}"
+  #subnetwork   = "https://www.googleapis.com/compute/v1/projects/${var.PROJECT}/regions/${var.REGION}/subnetworks/${var.SUBNETWORK}"
+  subnetwork   = "${var.SUBNETWORK}"
 }
 
 # -------------------------------------------------
