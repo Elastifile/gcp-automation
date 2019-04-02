@@ -1,22 +1,23 @@
 #!/bin/bash
-# Guy Rinkevich, Mar 2019
+# Guy Rinkevich, Apr 2019
 
 set -ux
 
 #variables
 SYSTEM_NAME_P="elastifile-guyr-p"
 SYSTEM_NAME_S="elastifile-guyr-s"
-EMS_ADDRESS_P="104.155.152.152"
-EMS_ADDRESS_S="35.222.29.134"
+EMS_ADDRESS_P="34.66.124.228"
+EMS_ADDRESS_S="35.225.208.5"
 SESSION_FILE_ECFS_P=session1.txt
 SESSION_FILE_ECFS_S=session2.txt
 PASSWORD_ECFS_P="changeme"
 PASSWORD_ECFS_S="changeme"
 RPO="5"
 SNAP_RETENTION="2"
-DC_NAME="DC01"
+DC_NAME="DC05"
 LOG="asyncdr-auto.log"
-MODE="site-pairing"
+MODE="get-pairing-status"
+ASYNC="true"
 
 #impliment command-line options
 
@@ -32,12 +33,13 @@ Usage:
   -g rpo
   -i snapshot retention
   -j dc name
-  -k mode: "site-pairing" "dc-pairing" "grace" "non-grace" "fail-back" "restore-primary" "get-pairing-status"
+  -k mode: "site-pairing" "dc-pairing" "dc-pairing-connect" "grace" "non-grace" "fail-back" "restore-primary" "get-pairing-status"
+  -l async: "true" or "false"
 E_O_F
   exit 1
 }
 
-while getopts "h?:a:b:c:d:e:f:g:i:j:k:" opt; do
+while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -62,6 +64,8 @@ while getopts "h?:a:b:c:d:e:f:g:i:j:k:" opt; do
     j)  DC_NAME=${OPTARG}
         ;;
     k)  MODE=${OPTARG}
+        ;;
+    l)  ASYNC=${OPTARG}
         ;;
     esac
 done
@@ -90,13 +94,23 @@ function dc_pairing {
         # Check the dc ID
         dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
         # Sync data containers
-	pair_id="$(curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/remote_sites|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"dc_pair":{"remote_site_id":"'$pair_id'","rpo":"'$RPO'","snapshots_retention":"'$SNAP_RETENTION'","dr_role":"role_dc_active"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs
-        sleep 20
-        remote_dc_pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"remote_dc_pair_uuid"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        echo $remote_dc_pair_id
-        # Connect the data containers pairing
-        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_P/api/dc_pairs/$remote_dc_pair_id/connect
+        pair_id="$(curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/remote_sites|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+	curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"dc_pair":{"remote_site_id":"'$pair_id'","rpo":"'$RPO'","snapshots_retention":"'$SNAP_RETENTION'","active_sync_op":"'$ASYNC'","dr_role":"role_dc_active"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs
+        #sleep 20
+    fi
+}
+
+function dc_pairing_connect {
+    if [[ $MODE == "dc-pairing-connect" ]]; then
+	remote_dc_pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"remote_dc_pair_uuid"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        for each_remote_dc_pair_id in ${remote_dc_pair_id//,/ }; do
+                echo $each_remote_dc_pair_id
+                # Connect the data containers pairing
+		is_connected="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H 'Content-Type: application/json' --request GET --url https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id|grep -o -E '.{0,12}"reason"'| cut -d ":" -f2| cut -d "," -f1| cut -d , -f 8 | cut -d \" -f 2 2>&1)"
+                if [[ ${is_connected} != "connected" ]]; then
+			curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id/connect
+		fi
+        done
     fi
 }
 
@@ -159,6 +173,7 @@ function fail_back {
         pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
         # Disconnect the dc pairing
         #curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
+        # Create a new snapshot before promoting the slave dc
         sleep 20
         # Force Secondary to passive
 	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id
@@ -176,7 +191,7 @@ function pairing_state {
         # Check the dc primary
         dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
         # Check the connection status
-        echo -e "\nConnection state of the Primary site.. \n" | tee -a ${LOG}
+	echo -e "\nConnection state of the Primary site.. \n" | tee -a ${LOG}
         curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
         echo -e "\nReplication statecof the Primary site.. \n" | tee -a ${LOG}
         curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
@@ -190,11 +205,11 @@ function pairing_state {
 
     fi
 }
-
 # Main
 establish_session
 site_pairing
 dc_pairing
+dc_pairing_connect
 non_graceful_failover
 graceful_failover
 restore_primary
