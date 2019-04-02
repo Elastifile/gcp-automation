@@ -9,7 +9,7 @@ EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "large"
 # number of vheads exlusive of EMS
-NUM_OF_VMS = "4"
+NUM_OF_VMS = "3"
 #<cpucores>_<ram> default: 4_42
 VM_CONFIG = "4_60"
 #local,persistent,hdd
