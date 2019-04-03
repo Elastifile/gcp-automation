@@ -6,15 +6,15 @@ set -ux
 #variables
 SYSTEM_NAME_P="elastifile-guyr-p"
 SYSTEM_NAME_S="elastifile-guyr-s"
-EMS_ADDRESS_P="34.66.124.228"
-EMS_ADDRESS_S="35.225.208.5"
+EMS_ADDRESS_P="34.66.109.11"
+EMS_ADDRESS_S="34.66.224.155"
 SESSION_FILE_ECFS_P=session1.txt
 SESSION_FILE_ECFS_S=session2.txt
 PASSWORD_ECFS_P="changeme"
 PASSWORD_ECFS_S="changeme"
 RPO="5"
 SNAP_RETENTION="2"
-DC_NAME="DC05"
+DC_NAME="DC01,DC02,DC03"
 LOG="asyncdr-auto.log"
 MODE="get-pairing-status"
 ASYNC="true"
@@ -33,8 +33,8 @@ Usage:
   -g rpo
   -i snapshot retention
   -j dc name
-  -k mode: "site-pairing" "dc-pairing" "dc-pairing-connect" "grace" "non-grace" "fail-back" "restore-primary" "get-pairing-status"
-  -l async: "true" or "false"
+  -k mode: "site-pairing" "dc-pairing" "grace" "non-grace" "fail-back" "restore-primary" "get-pairing-status"
+  -l async force promote : "true" or "false"
 E_O_F
   exit 1
 }
@@ -91,125 +91,140 @@ function site_pairing {
 }
 function dc_pairing {
     if [[ $MODE == "dc-pairing" ]]; then
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
-        # Sync data containers
-        pair_id="$(curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/remote_sites|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-	curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"dc_pair":{"remote_site_id":"'$pair_id'","rpo":"'$RPO'","snapshots_retention":"'$SNAP_RETENTION'","active_sync_op":"'$ASYNC'","dr_role":"role_dc_active"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs
-        #sleep 20
-    fi
-}
-
-function dc_pairing_connect {
-    if [[ $MODE == "dc-pairing-connect" ]]; then
-	remote_dc_pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"remote_dc_pair_uuid"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        for each_remote_dc_pair_id in ${remote_dc_pair_id//,/ }; do
+        for dc in ${DC_NAME//,/ }; do
+		# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
+        	# Sync data containers
+        	pair_id="$(curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/remote_sites|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+		curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"dc_pair":{"remote_site_id":"'$pair_id'","rpo":"'$RPO'","snapshots_retention":"'$SNAP_RETENTION'","dr_role":"role_dc_active"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs
+        done	
+		remote_dc_pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"remote_dc_pair_uuid"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        
+	for each_remote_dc_pair_id in ${remote_dc_pair_id//,/ }; do
                 echo $each_remote_dc_pair_id
                 # Connect the data containers pairing
-		is_connected="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H 'Content-Type: application/json' --request GET --url https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id|grep -o -E '.{0,12}"reason"'| cut -d ":" -f2| cut -d "," -f1| cut -d , -f 8 | cut -d \" -f 2 2>&1)"
+                is_connected="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H 'Content-Type: application/json' --request GET --url https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id|grep -o -E '.{0,12}"reason"'| cut -d ":" -f2| cut -d "," -f1| cut -d , -f 8 | cut -d \" -f 2 2>&1)"
                 if [[ ${is_connected} != "connected" ]]; then
-			curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id/connect
-		fi
+                        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_P/api/dc_pairs/$each_remote_dc_pair_id/connect
+                fi
         done
     fi
 }
 
 function non_graceful_failover {
     if [[ $MODE == "non-grace" ]]; then
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Disconnect the dc pairing
-        #curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
-        # Create a new snapshot before promoting the slave dc
-        echo -e "\nCreating Snapshot.. \n" | tee -a ${LOG}
-        curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"name":new_snap,"data_container_id":'$dc_id'}' https://$EMS_ADDRESS_S/api/snapshots
-        sleep 20
-	# Force Secondary DC to active
-        curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
+        for dc in ${DC_NAME//,/ }; do
+		# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"    
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Disconnect the dc pairing
+        	#curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
+        	# Create a new snapshot before promoting the slave dc
+        	echo -e "\nCreating Snapshot.. \n" | tee -a ${LOG}
+        	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"name":new_snap,"data_container_id":'$dc_id'}' https://$EMS_ADDRESS_S/api/snapshots
+        	is_snap=""
+		while [[ $is_snap == "" ]]; do
+			is_snap="$(curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X GET https://$EMS_ADDRESS_S/api/data_containers/$dc_id/snapshots|grep -o -E '.{0,12}"uuid"'| cut -d ":" -f2| cut -d "," -f1| cut -d , -f 8 | cut -d \" -f 2 2>&1)"
+		done
+		# Force Secondary DC to active
+        	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"asyncdr":'$ASYNC'}' https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
+	done
     fi
 }
 
 function graceful_failover {
     if [[ $MODE == "grace" ]]; then
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Disconnect the dc pairing
-        #curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
-        # Create a new snapshot before promoting the slave dc
-        echo -e "\nCreating Snapshot.. \n" | tee -a ${LOG}
-        curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"name":new_snap,"data_container_id":'$dc_id'}' https://$EMS_ADDRESS_S/api/snapshots
-        sleep 20
-	# Force Secondary DC to active
-        curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
-        # Force Primary DC to passive
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id
+	for dc in ${DC_NAME//,/ }; do
+        	# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Disconnect the dc pairing
+        	#curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
+        	# Create a new snapshot before promoting the slave dc
+        	echo -e "\nCreating Snapshot.. \n" | tee -a ${LOG}
+        	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"name":new_snap,"data_container_id":'$dc_id'}' https://$EMS_ADDRESS_S/api/snapshots
+        	is_snap=""
+                while [[ $is_snap == "" ]]; do
+                        is_snap="$(curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X GET https://$EMS_ADDRESS_S/api/data_containers/$dc_id/snapshots|grep -o -E '.{0,12}"uuid"'| cut -d ":" -f2| cut -d "," -f1| cut -d , -f 8 | cut -d \" -f 2 2>&1)"
+                done
+		# Force Secondary DC to active
+        	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST -d '{"asyncdr":'$ASYNC'}' https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
+        	# Force Primary DC to passive
+        	# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id
+	done
     fi
 }
 
 function restore_primary {
     if [[ $MODE == "restore-primary" ]]; then
-	# Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        sleep 20
-        # Force Primary to passive
-        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id
+	for dc in ${DC_NAME//,/ }; do
+		# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	#sleep 20
+        	# Force Primary to passive
+        	curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id
+	done
     fi
 }
 function fail_back {
     if [[ $MODE == "fail-back" ]]; then
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Disconnect the dc pairing
-        #curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
-        # Create a new snapshot before promoting the slave dc
-        sleep 20
-        # Force Secondary to passive
-	curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id
-        # Force Primary DC to active
-        # Check the dc ID
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the pairing ID
-        pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
+        for dc in ${DC_NAME//,/ }; do
+		# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Disconnect the dc pairing
+        	#curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X POST   https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id/disconnect
+        	# Create a new snapshot before promoting the slave dc
+        	#sleep 20
+        	# Force Secondary to passive
+		curl -k -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" -X PUT -d '{"dc_pair":{"dr_role":"role_dc_passive"}}'  https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs/$pair_id
+        	# Force Primary DC to active
+        	# Check the dc ID
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the pairing ID
+        	pair_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs|grep "id"| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	curl -k -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" -X POST -d '{"asyncdr":'$ASYNC'}' https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs/$pair_id/force_promote
+	done
     fi
 }
 
 function pairing_state {
     if [[ $MODE == "get-pairing-status" ]]; then
-        # Check the dc primary
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the connection status
-	echo -e "\nConnection state of the Primary site.. \n" | tee -a ${LOG}
-        curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
-        echo -e "\nReplication statecof the Primary site.. \n" | tee -a ${LOG}
-        curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
-        # Check the dc secondary
-        dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$DC_NAME'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
-        # Check the connection status
-        echo -e "\nConnection state of the Secondary site.. \n" | tee -a ${LOG}
-        curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
-        echo -e "\nReplication state of the Secondary site.. \n" | tee -a ${LOG}
-        curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
-
+        set +ux
+	for dc in ${DC_NAME//,/ }; do
+		# Check the dc primary
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the connection status
+		echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+		echo -e "\nConnection state of the Primary site - DC:"$dc".. \n" | tee -a ${LOG}
+        	curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
+        	echo -e "\nReplication state of the Primary site - DC:"$dc".. \n" | tee -a ${LOG}
+        	curl -k -s -b ${SESSION_FILE_ECFS_P} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_P/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1
+        	# Check the dc secondary
+        	dc_id="$(curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers|grep -o -E '.{0,4}"name":"'$dc'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+        	# Check the connection status
+        	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+		echo -e "\nConnection state of the Secondary site - DC:"$dc".. \n" | tee -a ${LOG}
+        	curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f13 |cut -d, -f1 2>&1
+        	echo -e "\nReplication state of the Secondary site - DC:"$dc".. \n" | tee -a ${LOG}
+        	curl -k -s -b ${SESSION_FILE_ECFS_S} -H "Content-Type: application/json" --request GET --url https://$EMS_ADDRESS_S/api/data_containers/$dc_id/dc_pairs| cut -d: -f14 |cut -d, -f1 2>&1 
+		echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	done
     fi
 }
 # Main
 establish_session
 site_pairing
 dc_pairing
-dc_pairing_connect
 non_graceful_failover
 graceful_failover
 restore_primary
