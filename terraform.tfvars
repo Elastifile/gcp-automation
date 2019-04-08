@@ -6,7 +6,7 @@ COMPANY_NAME = "elastifile"
 CONTACT_PERSON_NAME = "Guy_Rinkevich"
 # Contact person email address
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
-# "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
+# "small" "medium" "medium-plus" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "large"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
