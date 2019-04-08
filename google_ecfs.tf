@@ -156,7 +156,7 @@ resource "google_compute_disk" "ems-boot-disk" {
 resource "google_compute_instance" "Elastifile-EMS-Public" {
   count        = "${var.USE_PUBLIC_IP}"
   name         = "${var.CLUSTER_NAME}"
-  machine_type = "n1-standard-4"
+  machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
 
   tags = ["https-server"]
@@ -221,7 +221,7 @@ SCRIPT
 resource "google_compute_instance" "Elastifile-EMS-Private" {
   count        = "${1 - var.USE_PUBLIC_IP}"
   name         = "${var.CLUSTER_NAME}"
-  machine_type = "n1-standard-4"
+  machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
 
   tags = ["https-server"]
