@@ -163,31 +163,9 @@ function first_run {
 # "small" "medium" "large" "standard" "small standard" "local" "small local" "custom"
 function set_storage_type {
   echo -e "Configure systems...\n" | tee -a ${LOG}
-  if [[ $1 == "small" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":4}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "medium" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":5}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "medium-plus" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":6}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "large" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":7}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "standard" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":8}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "small standard" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":1}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "local" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":2}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  elif [[ $1 == "small local" ]]; then
-    echo -e "Setting storage type $1..." | tee -a ${LOG}
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":3}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
-  fi
+  type_id="$(curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X GET https://$EMS_ADDRESS/api/cloud_configurations|grep -o -E '.{0,4}"name":"'$1'"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+  echo -e "Setting storage type $1..." | tee -a ${LOG}
+  curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":"'$type_id'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
 }
 
 function set_storage_type_custom {
@@ -199,7 +177,8 @@ function set_storage_type_custom {
     echo -e "Configure systems...\n" | tee -a ${LOG}
     echo -e "Setting custom storage type: $type, num of disks: $disks, disk size=$disk_size cpu cores: $cpu_cores, ram: $ram \n" | tee -a ${LOG}
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"name":"legacy","storage_type":"'$type'","num_of_disks":'$disks',"disk_size":'$disk_size',"instance_type":"custom","cores":'$cpu_cores',"memory":'$ram',"min_num_of_instances":3}' https://$EMS_ADDRESS/api/cloud_configurations >> ${LOG} 2>&1
-    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":10}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
+    type_id="$(curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X GET https://$EMS_ADDRESS/api/cloud_configurations|grep -o -E '.{0,4}"name":"legacy"'| cut -d ":" -f2| cut -d "," -f1 2>&1)"
+    curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"id":1,"load_balancer_use":'$USE_LB',"cloud_configuration_id":"'$type_id'"}' https://$EMS_ADDRESS/api/cloud_providers/1 >> ${LOG} 2>&1
 }
 
 function setup_ems {
