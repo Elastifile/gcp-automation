@@ -118,3 +118,6 @@ Shared VPC configuration is partially supported, and will cot configure the Elas
 - Public IP, true/flase support.
 - Custom configuration of the cluster.
 - Full Destroy
+
+
+Small Local and Small Standard are not supported...
