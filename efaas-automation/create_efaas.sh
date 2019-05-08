@@ -27,7 +27,6 @@ Parameters:
   -n snapshots retention
   -o capacity
   -p credentials
-  -q multizone
 Examples:
   ./.sh -n 2 -a 1
 E_O_F
@@ -35,15 +34,11 @@ E_O_F
 }
 
 #variables
-#SESSION_FILE=session.txt
-#PASSWORD=`cat password.txt | cut -d " " -f 1`
 SETUP_COMPLETE="false"
-#NUM_OF_VMS=1
-#EMS_ADDRESS="127.0.0.1"
 LOG="create_efaas.log"
 taskid=0
 
-while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:q:" opt; do
+while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -79,29 +74,8 @@ while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:q:" opt; do
         ;;
     p)  CREDENTIALS=${OPTARG}
         ;;
-    q)  MULTIZONE=${OPTARG}
-        ;;
     esac
 done
-
-#capture computed variables
-#echo "EMS_ADDRESS: ${EMS_ADDRESS}" | tee ${LOG}
-#echo "NUM_OF_VMS: ${NUM_OF_VMS}" | tee -a ${LOG}
-
-#establish jwt token
-#function establish_token {
-#echo -e "Establishing https session..\n" | tee -a ${LOG}
-#curl -k -D ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"'$1'"}}' https://${EMS_ADDRESS}/api/sessions >> ${LOG} 2>&1
-#}
-
-# Provision  and deploy
-#function add_capacity {
-#  if [[ ${1} == 0 ]]; then
-#    echo -e "0 VMs configured, skipping create instances\n"
-#  fi
-#  create_instances ${1}
-#  job_status ecs_task
-#}
 
 # Kickoff a create enode instances job
 function create_efaas {
@@ -110,8 +84,16 @@ function create_efaas {
   token=`python3.6 main.py`
   token=`echo "$token"|xargs`
 
+  capacity_unit=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v1/projects/$PROJECT/service-class/$SERVICE_CLASS"|grep unitSize| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2| tr -d ',')
+  echo -e "capacity unit $capacity_unit"
+  tb=$((1024*1024*1024*1024))
+  node_capacity=$(echo - | awk "{print $capacity_unit / $tb}")
+  echo -e " node capacity $node_capacity"
+  needed_nodes=$(echo - | awk "{print $CAPACITY / $node_capacity}")
+  needed_nodes=$(echo $needed_nodes | awk '{print int($1)}')
+  needed_nodes=$((needed_nodes + 1))
   echo -e "Creating eFaas instance\n" | tee -a ${LOG}
-  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v1/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $CAPACITY, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ] }}" -H "$token")
+  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v1/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ] }}" -H "$token")
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
   job_status $service_id

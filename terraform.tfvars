@@ -7,7 +7,7 @@ CONTACT_PERSON_NAME = "Guy_Rinkevich"
 # Contact person email address
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "medium-plus" "large" "standard" "small standard" "local" "small local" "custom"
-TEMPLATE_TYPE = "large"
+TEMPLATE_TYPE = "small local"
 # number of vheads exlusive of EMS
 NUM_OF_VMS = "3"
 #<cpucores>_<ram> default: 4_42
@@ -31,12 +31,12 @@ SUBNETWORK = "elastifile-subnet"
 # GCP project network
 NETWORK = "elastifile-network"
 # GCP service account credential filename
-CREDENTIALS = "booming-mission-107807-ba9123136b7f.json"
+CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
 SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.com"
 # true false
 USE_PUBLIC_IP = true
 # deployment type - single, dual, multizone
-DEPLOYMENT_TYPE = "single"
+DEPLOYMENT_TYPE = "dual"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
 NODES_ZONES = "us-central1-f"
 # setup complete - false for initial deployment, true for add/remove nodes

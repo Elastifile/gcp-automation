@@ -292,7 +292,7 @@ locals {
 resource "null_resource" "cluster" {
   count = "${var.EMS_ONLY == "false" ? 1 : 0}"
   provisioner "local-exec" {
-     command     = "${path.module}/create_vheads.sh -c ${var.TEMPLATE_TYPE} -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${local.lb_vip} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
+     command     = "${path.module}/create_vheads.sh -c '${var.TEMPLATE_TYPE}' -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${local.lb_vip} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
     interpreter = ["/bin/bash", "-c"]
   }
 

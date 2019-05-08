@@ -61,13 +61,9 @@ variable "SNAPSHOT_RETENTION" {
   default = "10"
 }
 
-variable "MULTIZONE" {
-  default = "false"
-}
-
 resource "null_resource" "instance" {
   provisioner "local-exec" {
-     command	 = "${path.module}/create_efaas.sh -a ${var.EFAAS_END_POINT} -b ${var.PROJECT} -c ${var.NAME} -d ${var.DESCRIPTION} -e ${var.REGION} -f ${var.ZONE} -g ${var.SERVICE_CLASS} -i ${var.NETWORK} -j ${var.ACL_RANGE} -k ${var.ACL_ACCESS_RIGHTS} -l ${var.SNAPSHOT} -m ${var.SNAPSHOT_SCHEDULER} -n ${var.SNAPSHOT_RETENTION} -o ${var.CAPACITY} -p ${var.CREDENTIALS} -q ${var.MULTIZONE}"
+    command	 = "${path.module}/create_efaas.sh -a ${var.EFAAS_END_POINT} -b ${var.PROJECT} -c ${var.NAME} -d ${var.DESCRIPTION} -e ${var.REGION} -f ${var.ZONE} -g ${var.SERVICE_CLASS} -i ${var.NETWORK} -j ${var.ACL_RANGE} -k ${var.ACL_ACCESS_RIGHTS} -l ${var.SNAPSHOT} -m ${var.SNAPSHOT_SCHEDULER} -n ${var.SNAPSHOT_RETENTION} -o ${var.CAPACITY} -p ${var.CREDENTIALS}"
 
     interpreter = ["/bin/bash", "-c"]
   }

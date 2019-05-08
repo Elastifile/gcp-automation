@@ -3,7 +3,7 @@ EFAAS_END_POINT="https://silver-eagle.gcp.elastifile.com"
 # GCP Project Number
 PROJECT="533242302368"
 # Efaas Name
-NAME="guyr"
+NAME="guyr-new"
 # Efaas Description
 DESCRIPTION="guys-cluster"
 # Efaas Region
@@ -30,8 +30,8 @@ SNAPSHOT="true"
 SNAPSHOT_SCHEDULER="Weekly"
 # Snapshot Retention, deletes snapshot every X days.
 SNAPSHOT_RETENTION="7"
-# Capacity - min 6 for multizone instances or 3 for single zone
-CAPACITY="3"
+# Capacity in TB
+CAPACITY="18"
 # GCP service account credential filename
 CREDENTIALS="booming-mission-107807-0e99db2e1ce2.json"
 # Multizone - true or false
