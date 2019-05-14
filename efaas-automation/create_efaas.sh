@@ -27,6 +27,10 @@ Parameters:
   -n snapshots retention
   -o capacity
   -p credentials
+  -q dc name
+  -r dc description
+  -s quota type
+  -t hard quota
 Examples:
   ./.sh -n 2 -a 1
 E_O_F
@@ -38,7 +42,7 @@ SETUP_COMPLETE="false"
 LOG="create_efaas.log"
 taskid=0
 
-while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:" opt; do
+while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:q:r:s:t:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -74,6 +78,13 @@ while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:n:o:p:" opt; do
         ;;
     p)  CREDENTIALS=${OPTARG}
         ;;
+    q)  DC=${OPTARG}
+        ;;
+    r)  DC_DESCRIPTION=${OPTARG}
+        ;;
+    s)  QUOTA_TYPE=${OPTARG}
+        ;;
+    t)  HARD_QUOTA=${OPTARG}
     esac
 done
 
@@ -84,7 +95,8 @@ function create_efaas {
   token=`python3.6 main.py`
   token=`echo "$token"|xargs`
 
-  capacity_unit=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v1/projects/$PROJECT/service-class/$SERVICE_CLASS"|grep unitSize| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2| tr -d ',')
+  declare -a acl
+  capacity_unit=$(curl -k -b -X GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/service-class/$SERVICE_CLASS" -H "accept: application/json" -H "$token" |grep unitSize| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2| tr -d ',')
   echo -e "capacity unit $capacity_unit"
   tb=$((1024*1024*1024*1024))
   node_capacity=$(echo - | awk "{print $capacity_unit / $tb}")
@@ -93,12 +105,48 @@ function create_efaas {
   needed_nodes=$(echo $needed_nodes | awk '{print int($1)}')
   needed_nodes=$((needed_nodes + 1))
   echo -e "Creating eFaas instance\n" | tee -a ${LOG}
-  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v1/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ] }}" -H "$token")
+
+# creating an array for the acl range 
+  i=0
+  for index in ${ACL_RANGE//,/ }
+     do acl_range_array[$i]=$index
+     i=$((i+1))" "
+  done
+
+# creating an array for the acl access rights  
+  i=0
+  for index in ${ACL_ACCESS_RIGHTS//,/ }
+     do acl_rights_array[$i]=$index
+     i=$((i+1))" "
+  done
+  
+  echo "Number of ACLs - $i"
+ #test11="${acl[0]}" "${acl[1]}" "${acl[2]})"
+ #echo $test11
+
+# for index in ${!acl_range_arary[*]}; do acl[index]={\""{\\\"sourceRange\\\": \\\"${acl_range_array[$index]}\\\", \\\"accessRights\\\": \\\"${acl_rights_array[$index]}\\\"}"\"}; done
+# echo ${acl[@]}
+ #for index in ${!acl_range_arary[*]}; do acl[index]="{\\\"sourceRange\\\": \\\"${acl_range_array[$index]}\\\", \\\"accessRights\\\": \\\"${acl_rights_array[$index]}\\\"}"; done
+ #for index in ${!ACL_RANGE[*]}; do acl[index]="\"${ACL_RANGE[$index]}\", \"accessRights\": \"${ACL_ACCESS_RIGHTS[$index]}\""; done
+# exit 
+ #test=${acl[1]}","${acl[2]}
+
+  echo -e "Configure instance..$i.\n" | tee -a ${LOG}
+  if (( $i == 1 )); then
+  	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" } ] } } ]}" -H "$token")
+  elif (( $i == 2 )); then
+	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" } ] } } ]}" -H "$token")
+  elif (( $i == 3 )); then
+        result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" } ] } } ]}" -H "$token")
+  elif (( $i == 4 )); then
+        result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" }, { \"sourceRange\": \"${acl_range_array[3]}\", \"accessRights\": \"${acl_rights_array[3]}\" } ] } } ]}" -H "$token")
+  fi
+
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
   job_status $service_id
-}
 
+}
 # Function to check running job status
 function job_status {
   export ELASTIFILE_APPLICATION_CREDENTIALS="$CREDENTIALS"
@@ -106,7 +154,7 @@ function job_status {
   token=`python3.6 main.py`
   token=`echo "$token"|xargs`
   while true; do
-    STATUS=`curl -k -b -X  -H "accept: application/json" GET "$EFAAS_END_POINT/api/v1/projects/$PROJECT/operation/$service_id" -H "$token"| grep status| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2`
+    STATUS=`curl -k -b -X  -H "accept: application/json" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/operation/$service_id" -H "$token"| grep status| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2`
     echo -e  "efaas instance $1 : ${STATUS} " | tee -a ${LOG}
     if [[ ${STATUS} == "DONE" ]]; then
       echo -e "$1 Complete! \n" | tee -a ${LOG}
@@ -122,6 +170,4 @@ function job_status {
 }
 
 #MAIN
-#establish_token ${PASSWORD}
 create_efaas
-#add_capacity ${NUM_OF_VMS}

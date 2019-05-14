@@ -57,10 +57,10 @@ function update_efaas_acl {
   token=`python3.6 main.py`
   token=`echo "$token"|xargs`
   
-  fingerprint=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v1/projects/$PROJECT/instances/$NAME"| grep fingerprint| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2)
+  fingerprint=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME"| grep fingerprint| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2)
   echo -e "Updating eFaas acl to acl_range:$ACL_RANGE and acl_access_rights:$ACL_ACCESS_RIGHTS \n" | tee -a ${LOG}
 
-  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v1/projects/$PROJECT/instances/$NAME/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token")
+  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token")
 
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
@@ -75,7 +75,7 @@ function job_status {
   token=`echo "$token"|xargs`
   
   while true; do
-    STATUS=`curl -k -b -X  -H "accept: application/json" GET "$EFAAS_END_POINT/api/v1/projects/$PROJECT/operation/$1" -H "$token"| grep status| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2`
+    STATUS=`curl -k -b -X  -H "accept: application/json" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/operation/$1" -H "$token"| grep status| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2`
     echo -e  "update efaas acl : ${STATUS} " | tee -a ${LOG}
     if [[ ${STATUS} == "DONE" ]]; then
       echo -e "update efaas acl Complete! \n" | tee -a ${LOG}
