@@ -90,22 +90,25 @@ resource "null_resource" "instance" {
     interpreter = ["/bin/bash", "-c"]
   }
 }
-/*
-resource "null_resource" "update_acl" {
+
+resource "null_resource" "update_dc" {
   count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
 
   triggers {
     range = "${var.ACL_RANGE}"
     accessrights = "${var.ACL_ACCESS_RIGHTS}"
+    snapshot = "${var.SNAPSHOT}"
+    schedule = "${var.SNAPSHOT_SCHEDULER}"
+    retention = "${var.SNAPSHOT_RETENTION}"
   }
  
   provisioner "local-exec" {
-    command     = "${path.module}/update_efaas_acl.sh -a ${var.EFAAS_END_POINT} -b ${var.PROJECT} -c ${var.NAME} -d ${var.ACL_RANGE} -e ${var.CREDENTIALS} -f ${var.ACL_ACCESS_RIGHTS}"
+    command     = "${path.module}/update_dc.sh -a ${var.EFAAS_END_POINT} -b ${var.PROJECT} -c ${var.NAME} -d ${var.ACL_RANGE} -e ${var.CREDENTIALS} -f ${var.ACL_ACCESS_RIGHTS} -g ${var.DC} -i ${var.SNAPSHOT} -j ${var.SNAPSHOT_SCHEDULER} -k ${var.SNAPSHOT_RETENTION} -l ${var.QUOTA_TYPE} -m ${var.HARD_QUOTA}"
     interpreter = ["/bin/bash", "-c"]
   }
   depends_on = ["null_resource.instance"]
 }
-
+/*
 resource "null_resource" "update_snapshot" {
   count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
 

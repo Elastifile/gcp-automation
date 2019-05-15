@@ -79,7 +79,7 @@ function add_dc {
   token=`echo "$token"|xargs`
   is_dc_exist=""
   fingerprint=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME"| grep fingerprint| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2)
-  is_dc_exist=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME"| grep '"name": "filesystem_1"'| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2)
+  is_dc_exist=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME"| grep '"name": '| cut -d ":" -f2| cut -d \" -f 2|grep $DC)
   if [[ $is_dc_exist == $DC ]]; then
 	echo -e "File System $DC is already exists .." | tee -a ${LOG}
 	exit

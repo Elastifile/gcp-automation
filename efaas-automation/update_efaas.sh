@@ -61,13 +61,6 @@ function update_efaas {
   echo -e "Current Capacity $current_capacity B \n" | tee -a ${LOG}
   capacity_unit=$(curl -k -b -X GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/service-class/$SERVICE_CLASS" -H "accept: application/json" -H "$token" |grep unitSize| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2| tr -d ',')
   tb=$((1024*1024*1024*1024))
-  requested_capacity=$(echo - | awk "{print $CAPACITY * $tb}")
-  needed_capacity=$(echo - | awk "{print $requested_capacity - $current_capacity}")
-  if [[ $needed_capacity -le $capacity_unit ]]; then
-        echo -e "The eFaas instance capacity is already as requested, please add more capacity if needed .." | tee -a ${LOG}
-        exit
-  fi  
-
 
   node_capacity=$(echo - | awk "{print $capacity_unit / $tb}")
   echo -e " node capacity $node_capacity TB"
@@ -77,7 +70,11 @@ function update_efaas {
   echo -e " Updating the eFaas instance to $needed_nodes nodes"
   echo -e "Updating eFaas instance to $CAPACITY \n" | tee -a ${LOG}
   result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/setCapacity" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"provisionedCapacityUnits\": $needed_nodes,\"capacityUnitType\": \"Steps\"}" -H "$token")
-
+  check_if_needed=$(echo $result | awk 'NR==1{print $3}'| cut -d \" -f 2| tr -d ':')
+  if [[ ${check_if_needed} == "Conflict" ]]; then
+  	echo -e " The eFaas instance capacity is already as requested, please add more capacity if needed .." | tee -a ${LOG}
+        exit
+  fi
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
   job_status $service_id
