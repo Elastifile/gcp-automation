@@ -33,7 +33,6 @@ E_O_F
 #variables
 SETUP_COMPLETE="false"
 LOG="update_dc.log"
-taskid=0
 
 while getopts "h?:a:b:c:d:e:f:g:i:j:k:l:m:" opt; do
     case "$opt" in
@@ -76,7 +75,6 @@ function update_efaas_dc {
   token=`echo "$token"|xargs`
 
 # checking the dc fingerprint
-
   fingerprint=$(curl -k -b -X  -H "accept: application/json" -H "$token" GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME"| grep -B 3 -A 50 '"name": "'$DC'"',| grep "fingerprint"| cut -d ":" -f 2| cut -d \" -f 2)  
   echo "$fingerprint"
 # checking the dc id
@@ -99,7 +97,6 @@ function update_efaas_dc {
 
   echo "Number of ACLs - $i"
 # updating the filesystem acl
-
   echo -e "Updating filesystem acl.." | tee -a ${LOG}
   if (( $i == 1 )); then
         result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token") 
@@ -117,7 +114,6 @@ function update_efaas_dc {
   sleep 5
 
 # updating the filesystem snapshot
-
   echo -e "Updating filesystem snapshots.." | tee -a ${LOG}
   result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setScheduling" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION}" -H "$token")
 # checking the filesystem snapshot status

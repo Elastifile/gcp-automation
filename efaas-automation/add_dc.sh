@@ -113,7 +113,6 @@ function add_dc {
   	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" }, { \"sourceRange\": \"${acl_range_array[3]}\", \"accessRights\": \"${acl_rights_array[3]}\" } ], \"fingerprint\": \"$fingerprint\" }}" -H "$token")
   fi
 
-#  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"$ACL_RANGE\", \"accessRights\": \"$ACL_ACCESS_RIGHTS\" } ], \"fingerprint\": \"$fingerprint\" }}" -H "$token")
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
   job_status $service_id

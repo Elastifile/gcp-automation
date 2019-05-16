@@ -95,7 +95,6 @@ function create_efaas {
   token=`python3.6 main.py`
   token=`echo "$token"|xargs`
 
-  declare -a acl
   capacity_unit=$(curl -k -b -X GET "$EFAAS_END_POINT/api/v2/projects/$PROJECT/service-class/$SERVICE_CLASS" -H "accept: application/json" -H "$token" |grep unitSize| cut -d ":" -f2| awk 'NR==1{print $1}'| cut -d \" -f 2| tr -d ',')
   echo -e "capacity unit $capacity_unit"
   tb=$((1024*1024*1024*1024))
@@ -110,26 +109,19 @@ function create_efaas {
   i=0
   for index in ${ACL_RANGE//,/ }
      do acl_range_array[$i]=$index
-     i=$((i+1))" "
+     i=$((i+1))
   done
-
+# i=($i+1)
 # creating an array for the acl access rights  
   i=0
   for index in ${ACL_ACCESS_RIGHTS//,/ }
      do acl_rights_array[$i]=$index
-     i=$((i+1))" "
+     i=$((i+1))
   done
   
   echo "Number of ACLs - $i"
- #test11="${acl[0]}" "${acl[1]}" "${acl[2]})"
- #echo $test11
 
 # for index in ${!acl_range_arary[*]}; do acl[index]={\""{\\\"sourceRange\\\": \\\"${acl_range_array[$index]}\\\", \\\"accessRights\\\": \\\"${acl_rights_array[$index]}\\\"}"\"}; done
-# echo ${acl[@]}
- #for index in ${!acl_range_arary[*]}; do acl[index]="{\\\"sourceRange\\\": \\\"${acl_range_array[$index]}\\\", \\\"accessRights\\\": \\\"${acl_rights_array[$index]}\\\"}"; done
- #for index in ${!ACL_RANGE[*]}; do acl[index]="\"${ACL_RANGE[$index]}\", \"accessRights\": \"${ACL_ACCESS_RIGHTS[$index]}\""; done
-# exit 
- #test=${acl[1]}","${acl[2]}
 
   echo -e "Configure instance..$i.\n" | tee -a ${LOG}
   if (( $i == 1 )); then
