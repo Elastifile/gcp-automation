@@ -106,6 +106,8 @@ variable "KMS_KEY" {
   default = ""
 }
 
+variable "SSH_CREDENTIALS" {}
+
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -237,12 +239,12 @@ SCRIPT
   
   # move the credentials json to the ems
   provisioner "file" {
-    source      = "canary-support-8ae8eefb786c.json"
+    source      = "${var.CREDENTIALS}"
     destination = "/home/centos/credentials.json"
    
     connection {
       user        = "centos"
-      private_key = "${file("/Users/guyt/Desktop/keys/elastifile.pem")}"
+      private_key = "${file("${var.SSH_CREDENTIALS}")}"
     }
   }
 }
@@ -327,12 +329,12 @@ SCRIPT
 
   # move the credentials json to the ems
   provisioner "file" {
-   source      = "canary-support-8ae8eefb786c.json" 
+   source      = "${var.CREDENTIALS}" 
    destination = "/home/centos/credentials.json"
   
    connection {
       user        = "centos"
-      private_key = "${file("/Users/guyt/Desktop/keys/elastifile.pem")}"
+      private_key = "${file("${var.SSH_CREDENTIALS}")}"
     }
   }
 }

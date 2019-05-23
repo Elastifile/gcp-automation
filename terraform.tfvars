@@ -55,3 +55,5 @@ DATA_CONTAINER = "DC01"
 EMS_ONLY = "true"
 #kms - customer managed encryption key
 KMS_KEY = ""
+# path to key file
+SSH_CREDENTIALS = "~/elastifile.pem"
