@@ -1,11 +1,11 @@
 # Elastifile image version
-IMAGE = "elastifile-storage-3-1-0-33-ems"
+IMAGE = "emanage-3-1-0-34-e09a72d09641"
 # Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
 # Contact person name - No spaces allowed
-CONTACT_PERSON_NAME = "Guy_Rinkevich"
+CONTACT_PERSON_NAME = "Guy_Toledano"
 # Contact person email address
-EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
+EMAIL_ADDRESS = "guy.toledano@elastifile.com"
 # "small" "medium" "medium-plus" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "small local"
 # number of vheads exlusive of EMS
@@ -19,26 +19,26 @@ DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
 LB_TYPE = "elastifile"
 # instance prefix
-CLUSTER_NAME = "elastifile-guyr"
+CLUSTER_NAME = "elastifile-guyt"
 # GCP region
-REGION = "us-central1"
+REGION = "us-east2"
 # GCP zone
-EMS_ZONE = "us-central1-f"
+EMS_ZONE = "us-east2-a"
 # GCP project
-PROJECT = "booming-mission-107807"
+PROJECT = "canary-support"
 # GCP project subnetwork
-SUBNETWORK = "elastifile-subnet"
+SUBNETWORK = "mcp-clone01"
 # GCP project network
-NETWORK = "elastifile-network"
+NETWORK = "mcp-clone01"
 # GCP service account credential filename
-CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
-SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.com"
+CREDENTIALS = "canary-support-8ae8eefb786c.json"
+SERVICE_EMAIL = "canary-support-admin@canary-support.iam.gserviceaccount.com"
 # true false
-USE_PUBLIC_IP = true
+USE_PUBLIC_IP = false
 # deployment type - single, dual, multizone
-DEPLOYMENT_TYPE = "dual"
+DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
-NODES_ZONES = "us-central1-f"
+NODES_ZONES = "us-east2-a"
 # setup complete - false for initial deployment, true for add/remove nodes
 SETUP_COMPLETE = "false"
 # Clear Tier - true false
@@ -52,6 +52,6 @@ LB_VIP = "auto"
 # Data Container name
 DATA_CONTAINER = "DC01"
 #create EMS only
-EMS_ONLY = "false"
+EMS_ONLY = "true"
 #kms - customer managed encryption key
 KMS_KEY = ""

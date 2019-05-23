@@ -106,7 +106,6 @@ variable "KMS_KEY" {
   default = ""
 }
 
-
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -135,7 +134,7 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+  image = "projects/elastifile-ci/global/images/${var.IMAGE}"
   disk_encryption_key{
         kms_key_self_link = "${var.KMS_KEY}"
    }
@@ -146,7 +145,7 @@ resource "google_compute_disk" "ems-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+  image = "projects/elastifile-ci/global/images/${var.IMAGE}"
 }
 
 # -------------------------------------------------
@@ -169,7 +168,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+#      image = "projects/elastifile-ci/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
 
@@ -200,7 +199,26 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   }
 
   metadata_startup_script = <<SCRIPT
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
+  sudo echo domain mpclone.local. >> /etc/resolv.conf
+  sudo echo search mpclone.local. >> /etc/resolv.conf
+  sudo echo nameserver 172.16.1.4 >> /etc/resolv.conf
+  sudo echo nameserver 172.16.1.2 >> /etc/resolv.conf
+
+  sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo NO_PROXY=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo http_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo FTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo ftp_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTPS_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo https_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo no_proxy=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  systemctl restart ecp
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
@@ -215,6 +233,17 @@ SCRIPT
   service_account {
     email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
+  }
+  
+  # move the credentials json to the ems
+  provisioner "file" {
+    source      = "canary-support-8ae8eefb786c.json"
+    destination = "/home/centos/credentials.json"
+   
+    connection {
+      user        = "centos"
+      private_key = "${file("/Users/guyt/Desktop/keys/elastifile.pem")}"
+    }
   }
 }
 
@@ -234,7 +263,7 @@ labels = [
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+#      image = "projects/elastifile-ci/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
   }
@@ -260,7 +289,25 @@ labels = [
   }
 
   metadata_startup_script = <<SCRIPT
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
+  sudo echo domain mpclone.local. >> /etc/resolv.conf
+  sudo echo search mpclone.local. >> /etc/resolv.conf
+  sudo echo nameserver 172.16.1.4 >> /etc/resolv.conf
+  sudo echo nameserver 172.16.1.2 >> /etc/resolv.conf
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo NO_PROXY=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo http_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo FTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo ftp_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTPS_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo https_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo no_proxy=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  systemctl restart ecp
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
@@ -269,12 +316,24 @@ labels = [
   sudo echo hosts=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo customer_id=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo signature=sO9+j5Q/OPBaB+bMViAITGvN6by8vOYUrxNsOBYWZ4yBNqHj02iqpmqk2oxO XI3voLGhg6f0WW2MStEwxv46ia2iOjMZVCi/ekDL4nioYG3L5Sfzs/NMLI+D vlC36rkOfAkMrjkN9z1bRFNYwHCnXf58TC/W7RM6gimzRqpIz14= >> /elastifile/emanage/lic/license.gcp.lic
+
 SCRIPT
 
   # specify the GCP project service account to use
   service_account {
     email  = "${var.SERVICE_EMAIL}"
     scopes = ["cloud-platform"]
+  }
+
+  # move the credentials json to the ems
+  provisioner "file" {
+   source      = "canary-support-8ae8eefb786c.json" 
+   destination = "/home/centos/credentials.json"
+  
+   connection {
+      user        = "centos"
+      private_key = "${file("/Users/guyt/Desktop/keys/elastifile.pem")}"
+    }
   }
 }
 
