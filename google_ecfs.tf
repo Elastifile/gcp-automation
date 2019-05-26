@@ -219,9 +219,10 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   metadata_startup_script = <<SCRIPT
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_2};" |sudo tee -a /etc/dhclient.conf > /dev/null
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_1};" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-name ${var.DOMAIN_NAME};" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-search ${var.DOMAIN_SEARCH};" |sudo tee -a /etc/dhclient.conf > /dev/null
-
+  sudo echo "prepend domain-name '${var.DOMAIN_NAME}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-search '${var.DOMAIN_SEARCH}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo ifdown eth0 && sudo ifup eth0
+  
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -307,10 +308,11 @@ labels = [
   }
 
   metadata_startup_script = <<SCRIPT
-  sudo echo prepend domain-name-servers 172.16.1.2; >> /etc/dhclient.conf
-  sudo echo prepend domain-name-servers 172.16.1.4; >> /etc/dhclient.conf
-  sudo echo prepend domain-name "mpclone.local"; >> /etc/dhclient.conf
-  sudo echo prepend domain-search "mpclone.local"; >> /etc/dhclient.conf
+  sudo echo "prepend domain-name-servers ${var.DNS_SERVER_2};" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-name-servers ${var.DNS_SERVER_1};" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-name '${var.DOMAIN_NAME}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-search '${var.DOMAIN_SEARCH}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo ifdown eth0 && sudo ifup eth0
 
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
