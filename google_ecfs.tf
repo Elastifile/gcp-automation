@@ -108,6 +108,22 @@ variable "KMS_KEY" {
 
 variable "SSH_CREDENTIALS" {}
 
+variable "NO_PROXY" {
+  default = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
+}
+
+variable "PROXY_IP" {}
+
+variable "PROXY_PORT" {}
+
+variable "DNS_SERVER_1" {}
+
+variable "DNS_SERVER_2" {}
+
+variable "DOMAIN_NAME" {}
+
+variable "DOMAIN_SEARCH" {}
+
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
   project     = "${var.PROJECT}"
@@ -201,23 +217,23 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   }
 
   metadata_startup_script = <<SCRIPT
-  sudo echo domain mpclone.local. >> /etc/resolv.conf
-  sudo echo search mpclone.local. >> /etc/resolv.conf
-  sudo echo nameserver 172.16.1.4 >> /etc/resolv.conf
-  sudo echo nameserver 172.16.1.2 >> /etc/resolv.conf
+  sudo echo prepend domain-name-servers 172.16.1.2; >> /etc/dhclient.conf
+  sudo echo prepend domain-name-servers 172.16.1.4; >> /etc/dhclient.conf
+  sudo echo prepend domain-name "mpclone.local"; >> /etc/dhclient.conf
+  sudo echo prepend domain-search "mpclone.local"; >> /etc/dhclient.conf
 
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo NO_PROXY=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo http_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo FTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo ftp_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo HTTPS_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo https_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo no_proxy=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo HTTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo http_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo FTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo ftp_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTPS_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo https_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo no_proxy=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   systemctl restart ecp
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
@@ -291,25 +307,26 @@ labels = [
   }
 
   metadata_startup_script = <<SCRIPT
-  sudo echo domain mpclone.local. >> /etc/resolv.conf
-  sudo echo search mpclone.local. >> /etc/resolv.conf
-  sudo echo nameserver 172.16.1.4 >> /etc/resolv.conf
-  sudo echo nameserver 172.16.1.2 >> /etc/resolv.conf
-  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo prepend domain-name-servers 172.16.1.2; >> /etc/dhclient.conf
+  sudo echo prepend domain-name-servers 172.16.1.4; >> /etc/dhclient.conf
+  sudo echo prepend domain-name "mpclone.local"; >> /etc/dhclient.conf
+  sudo echo prepend domain-search "mpclone.local"; >> /etc/dhclient.conf
+
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo NO_PROXY=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo http_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo FTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo ftp_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo HTTPS_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo https_proxy=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo no_proxy=127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo HTTP_PROXY=http://172.16.1.3:3128/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo http_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo FTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo ftp_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTPS_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo https_proxy=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo no_proxy=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo HTTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   systemctl restart ecp
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic

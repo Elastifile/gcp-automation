@@ -57,3 +57,11 @@ EMS_ONLY = "true"
 KMS_KEY = ""
 # path to key file
 SSH_CREDENTIALS = "~/elastifile.pem"
+#proxy params
+NO_PROXY = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
+PROXY_IP = "http://172.16.1.3"
+PROXY_PORT = "3128"
+DNS_SERVER_1 = "172.16.1.4"
+DNS_SERVER_2 = "172.16.1.2"
+DOMAIN_NAME = "mpclone.local"
+DOMAIN_SEARCH = "mpclone.local"
