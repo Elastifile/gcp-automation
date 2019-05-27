@@ -57,6 +57,7 @@ EMS_ONLY = "true"
 KMS_KEY = ""
 # path to key file
 SSH_CREDENTIALS = "~/elastifile.pem"
+CREDETIALS_DESTINATION_PATH = "/elastifile/conf/credentials.json"
 #proxy params
 NO_PROXY = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
 PROXY_IP = "http://172.16.1.3"

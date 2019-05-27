@@ -108,6 +108,10 @@ variable "KMS_KEY" {
 
 variable "SSH_CREDENTIALS" {}
 
+variable "CREDETIALS_DESTINATION_PATH" {
+  default = "/elastifile/conf/credentials.json"
+}
+
 variable "NO_PROXY" {
   default = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
 }
@@ -219,8 +223,8 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   metadata_startup_script = <<SCRIPT
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_2};" |sudo tee -a /etc/dhclient.conf > /dev/null
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_1};" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-name '${var.DOMAIN_NAME}';" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-search '${var.DOMAIN_SEARCH}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-name \"${var.DOMAIN_NAME}\";" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-search \"${var.DOMAIN_SEARCH}\";" |sudo tee -a /etc/dhclient.conf > /dev/null
   sudo ifdown eth0 && sudo ifup eth0
   
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -257,7 +261,7 @@ SCRIPT
   # move the credentials json to the ems
   provisioner "file" {
     source      = "${var.CREDENTIALS}"
-    destination = "/home/centos/credentials.json"
+    destination = "${var.CREDETIALS_DESTINATION_PATH}"
    
     connection {
       user        = "centos"
@@ -310,8 +314,8 @@ labels = [
   metadata_startup_script = <<SCRIPT
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_2};" |sudo tee -a /etc/dhclient.conf > /dev/null
   sudo echo "prepend domain-name-servers ${var.DNS_SERVER_1};" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-name '${var.DOMAIN_NAME}';" |sudo tee -a /etc/dhclient.conf > /dev/null
-  sudo echo "prepend domain-search '${var.DOMAIN_SEARCH}';" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-name \"${var.DOMAIN_NAME}\";" |sudo tee -a /etc/dhclient.conf > /dev/null
+  sudo echo "prepend domain-search \"${var.DOMAIN_SEARCH}\";" |sudo tee -a /etc/dhclient.conf > /dev/null
   sudo ifdown eth0 && sudo ifup eth0
 
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -349,7 +353,7 @@ SCRIPT
   # move the credentials json to the ems
   provisioner "file" {
    source      = "${var.CREDENTIALS}" 
-   destination = "/home/centos/credentials.json"
+   destination = "${var.CREDETIALS_DESTINATION_PATH}"
   
    connection {
       user        = "centos"
