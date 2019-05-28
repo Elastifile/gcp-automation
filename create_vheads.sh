@@ -262,7 +262,11 @@ function job_status {
       echo -e "$1 Failed. Exiting..\n" | tee -a ${LOG}
       exit 1
     fi
-    sleep 10
+    if [[ $STATUS == "in_progress" ]]; then
+      sleep 10
+      continue
+    fi
+    first_run
   done
 }
 
