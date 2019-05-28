@@ -1,5 +1,5 @@
 # Elastifile image version
-IMAGE = "emanage-3-1-0-34-e09a72d09641"
+IMAGE = "elastifile-storage-3-1-0-34-ems"
 # Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
 # Contact person name - No spaces allowed
@@ -57,8 +57,9 @@ EMS_ONLY = "true"
 KMS_KEY = ""
 # path to key file
 SSH_PRIVATE_KEY = "~/Desktop/keys/elastifile.pem"
-SSH_PUBLIC_KEY = "~/Desktop/keys/elastifile.pem"
+SSH_PUBLIC_KEY = "~/Desktop/keys/elastifile.pem.pub"
 SSH_USER = "centos"
+# path in ems (remote) instance
 CREDETIALS_DESTINATION_PATH = "/elastifile/conf/credentials.json"
 IMAGE_PROJECT = "elastifle-public-196717"
 #proxy params
