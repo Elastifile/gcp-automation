@@ -113,7 +113,7 @@ variable "CREDETIALS_DESTINATION_PATH" {
 }
 
 variable "NO_PROXY" {
-  default = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
+  default = "127.0.0.1,169.254.169.254,metadata,metadata.google.internal,localhost,*.google.internal"
 }
 
 variable "PROXY_IP" {}
