@@ -106,10 +106,20 @@ variable "KMS_KEY" {
   default = ""
 }
 
-variable "SSH_CREDENTIALS" {}
+variable "SSH_PRIVATE_KEY" {}
+
+variable "SSH_PUBLIC_KEY" {}
+
+variable "SSH_USER" {
+  default = "centos"
+}
 
 variable "CREDETIALS_DESTINATION_PATH" {
   default = "/elastifile/conf/credentials.json"
+}
+
+variable "IMAGE_PROJECT" {
+  default = "elastifle-public-196717"
 }
 
 variable "NO_PROXY" {
@@ -156,7 +166,7 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifile-ci/global/images/${var.IMAGE}"
+  image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
   disk_encryption_key{
         kms_key_self_link = "${var.KMS_KEY}"
    }
@@ -167,7 +177,7 @@ resource "google_compute_disk" "ems-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifile-ci/global/images/${var.IMAGE}"
+  image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 }
 
 # -------------------------------------------------
@@ -190,7 +200,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifile-ci/global/images/${var.IMAGE}"
+#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
 
@@ -218,6 +228,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
     enable-oslogin      = "false"
+    sshKeys		= "${var.SSH_USER}:${file("${var.SSH_PUBLIC_KEY}")}"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -228,7 +239,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   sudo ifdown eth0 && sudo ifup eth0
   
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/elastifile/conf/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="${var.CREDETIALS_DESTINATION_PATH}" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -241,7 +252,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   sudo echo HTTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   systemctl restart ecp
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh 
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
@@ -264,8 +275,8 @@ SCRIPT
     destination = "${var.CREDETIALS_DESTINATION_PATH}"
    
     connection {
-      user        = "centos"
-      private_key = "${file("${var.SSH_CREDENTIALS}")}"
+      user        = "${var.SSH_USER}"
+      private_key = "${file("${var.SSH_PRIVATE_KEY}")}"
     }
   }
 }
@@ -286,7 +297,7 @@ labels = [
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifile-ci/global/images/${var.IMAGE}"
+#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
   }
@@ -309,6 +320,7 @@ labels = [
     password_is_changed = "${var.PASSWORD_IS_CHANGED}"
     setup_complete      = "${var.SETUP_COMPLETE}"
     enable-oslogin      = "false"
+    sshKeys             = "${var.SSH_USER}:${file("${var.SSH_PUBLIC_KEY}")}"
   }
 
   metadata_startup_script = <<SCRIPT
@@ -319,7 +331,7 @@ labels = [
   sudo ifdown eth0 && sudo ifup eth0
 
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/elastifile/conf/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="${var.CREDETIALS_DESTINATION_PATH}" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -332,7 +344,7 @@ labels = [
   sudo echo HTTP_PROXY=${var.PROXY_IP}:${var.PROXY_PORT}/ | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo export GOOGLE_APPLICATION_CREDENTIALS NO_PROXY no_proxy http_proxy HTTP_PROXY https_proxy HTTPS_PROXY FTP_PROXY ftp_proxy CLOUD_ZONE CLOUD_PROJECT HOSTNAME | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   systemctl restart ecp
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=Elastifile-CI\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
@@ -356,8 +368,8 @@ SCRIPT
    destination = "${var.CREDETIALS_DESTINATION_PATH}"
   
    connection {
-      user        = "centos"
-      private_key = "${file("${var.SSH_CREDENTIALS}")}"
+      user        = "${var.SSH_USER}"
+      private_key = "${file("${var.SSH_PRIVATE_KEY}")}"
     }
   }
 }

@@ -56,10 +56,13 @@ EMS_ONLY = "true"
 #kms - customer managed encryption key
 KMS_KEY = ""
 # path to key file
-SSH_CREDENTIALS = "~/elastifile.pem"
+SSH_PRIVATE_KEY = "~/Desktop/keys/elastifile.pem"
+SSH_PUBLIC_KEY = "~/Desktop/keys/elastifile.pem"
+SSH_USER = "centos"
 CREDETIALS_DESTINATION_PATH = "/elastifile/conf/credentials.json"
+IMAGE_PROJECT = "elastifle-public-196717"
 #proxy params
-NO_PROXY = "127.0.0.1,169.254.169.254,metadata,metadata.google.insternal,localhost,*.google.internal"
+NO_PROXY = "127.0.0.1,169.254.169.254,metadata,metadata.google.internal,localhost,*.google.internal"
 PROXY_IP = "http://172.16.1.3"
 PROXY_PORT = "3128"
 DNS_SERVER_1 = "172.16.1.4"
