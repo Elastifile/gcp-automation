@@ -228,7 +228,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   sudo ifdown eth0 && sudo ifup eth0
   
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/elastifile/conf/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
@@ -319,7 +319,7 @@ labels = [
   sudo ifdown eth0 && sudo ifup eth0
 
   sudo echo CLOUD_ZONE=${var.EMS_ZONE} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
-  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/home/centos/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
+  sudo echo GOOGLE_APPLICATION_CREDENTIALS="/elastifile/conf/credentials.json" | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo CLOUD_PROJECT=${var.PROJECT} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo HOSTNAME=${var.CLUSTER_NAME} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
   sudo echo NO_PROXY=${var.NO_PROXY} | tee -a /elastifile/conf/cloud_env.sh /etc/profile.d/proxy.sh
