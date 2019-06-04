@@ -104,35 +104,39 @@ function create_efaas {
   needed_nodes=$(echo $needed_nodes | awk '{print int($1)}')
   needed_nodes=$((needed_nodes + 1))
   echo -e "Creating eFaas instance\n" | tee -a ${LOG}
-
-# creating an array for the acl range 
+ 
+# creating an array for the acl range
   i=0
   for index in ${ACL_RANGE//,/ }
      do acl_range_array[$i]=$index
      i=$((i+1))
   done
-# i=($i+1)
-# creating an array for the acl access rights  
+# creating an array for the acl access rights
   i=0
   for index in ${ACL_ACCESS_RIGHTS//,/ }
      do acl_rights_array[$i]=$index
      i=$((i+1))
   done
-  
+
   echo "Number of ACLs - $i"
 
-# for index in ${!acl_range_arary[*]}; do acl[index]={\""{\\\"sourceRange\\\": \\\"${acl_range_array[$index]}\\\", \\\"accessRights\\\": \\\"${acl_rights_array[$index]}\\\"}"\"}; done
 
-  echo -e "Configure instance..$i.\n" | tee -a ${LOG}
-  if (( $i == 1 )); then
-  	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" } ] } } ]}" -H "$token")
-  elif (( $i == 2 )); then
-	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" } ] } } ]}" -H "$token")
-  elif (( $i == 3 )); then
-        result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" } ] } } ]}" -H "$token")
-  elif (( $i == 4 )); then
-        result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"$NAME\", \"description\": \"$DESCRIPTION\", \"serviceClass\": \"$SERVICE_CLASS\", \"provisionedCapacityUnits\": $needed_nodes, \"capacityUnitType\": \"Steps\", \"region\": \"$REGION\", \"zone\": \"$ZONE\", \"network\": \"$NETWORK\", \"networkProject\": \"$PROJECT\", \"filesystems\": [ { \"name\": \"$DC\", \"description\": \"$DC_DESCRIPTION\", \"quotaType\": \"$QUOTA_TYPE\", \"hardQuota\": $HARD_QUOTA, \"snapshot\": { \"enable\": $SNAPSHOT, \"schedule\": \"$SNAPSHOT_SCHEDULER\", \"retention\": $SNAPSHOT_RETENTION }, \"accessors\": { \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" }, { \"sourceRange\": \"${acl_range_array[3]}\", \"accessRights\": \"${acl_rights_array[3]}\" } ] } } ]}" -H "$token")
-  fi
+for index in ${!acl_range_array[*]}; do
+    acl[index]='{"sourceRange": "'${acl_range_array[$index]}'", "accessRights": "'${acl_rights_array[$index]}'"}'
+done
+
+acl_vector=""
+for index in ${!acl[*]}; do
+  acl_vector=$acl_vector${acl[$index]}","
+done
+
+inside_data=`echo ${acl_vector::-1}`
+accessor_data=' "accessors": { "items": [ '${inside_data}' ] }'
+
+json_data='{ "name":"'$NAME'", "description": "'$DESCRIPTION'", "serviceClass": "'$SERVICE_CLASS'", "provisionedCapacityUnits": '$needed_nodes', "capacityUnitType": "Steps", "region": "'$REGION'", "zone": "'$ZONE'", "network": "'$NETWORK'", "networkProject": "'$PROJECT'", "filesystems": [ { "name": "'$DC'", "description": "'$DC_DESCRIPTION'", "quotaType": "'$QUOTA_TYPE'", "hardQuota": '$HARD_QUOTA', "snapshot": { "enable": '$SNAPSHOT', "schedule": "'$SNAPSHOT_SCHEDULER'", "retention": '$SNAPSHOT_RETENTION' }, '$accessor_data' } ]}'
+
+
+result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances" -H "accept: application/json" -H "Content-Type: application/json" -d "$json_data" -H "$token")
 
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}
