@@ -97,16 +97,21 @@ function update_efaas_dc {
 
   echo "Number of ACLs - $i"
 # updating the filesystem acl
+
+  for index in ${!acl_range_array[*]}; do
+      acl[index]='{"sourceRange": "'${acl_range_array[$index]}'", "accessRights": "'${acl_rights_array[$index]}'"}'
+  done
+
+  acl_vector=""
+  for index in ${!acl[*]}; do
+    acl_vector=$acl_vector${acl[$index]}","
+  done
+
+  inside_data=`echo ${acl_vector::-1}`
+  accessor_data='{ "items": [ '${inside_data}' ] }'
+
   echo -e "Updating filesystem acl.." | tee -a ${LOG}
-  if (( $i == 1 )); then
-        result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token") 
-  elif (( $i == 2 )); then
- 	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token")
-  elif (( $i == 3 )); then
-	result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token")
-  elif (( $i == 4 )); then
-  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"items\": [ { \"sourceRange\": \"${acl_range_array[0]}\", \"accessRights\": \"${acl_rights_array[0]}\" }, { \"sourceRange\": \"${acl_range_array[1]}\", \"accessRights\": \"${acl_rights_array[1]}\" }, { \"sourceRange\": \"${acl_range_array[2]}\", \"accessRights\": \"${acl_rights_array[2]}\" }, { \"sourceRange\": \"${acl_range_array[3]}\", \"accessRights\": \"${acl_rights_array[3]}\" } ], \"fingerprint\": \"$fingerprint\" }" -H "$token")
-  fi
+  result=$(curl -k -X POST "$EFAAS_END_POINT/api/v2/projects/$PROJECT/instances/$NAME/filesystem/$dc_id/setAccessors" -H "accept: application/json" -H "Content-Type: application/json" -d "$accessor_data" -H "$token") 
 # checking the filesystem acl status
   service_id=`echo $result| cut -d " " -f 3 | cut -d \" -f 2`
   echo $result | tee -a ${LOG}

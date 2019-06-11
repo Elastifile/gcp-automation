@@ -3,7 +3,7 @@ EFAAS_END_POINT="https://bronze-eagle.gcp.elastifile.com"
 # GCP Project Number
 PROJECT="533242302368"
 # Efaas Name
-NAME="guyr-efaas-2"
+NAME="guyr-efaas"
 # Efaas Description
 DESCRIPTION="guys-cluster"
 # Efaas Region
@@ -23,7 +23,7 @@ NETWORK="elastifile-network"
 # ACL IP Address Range or all
 ACL_RANGE="all,0.0.0.0/0,192.178.0.0/24"
 # ACL Access rights, readOnly or readWrite
-ACL_ACCESS_RIGHTS="readWrite,readWrite,readOnly"
+ACL_ACCESS_RIGHTS="readWrite,readOnly,readOnly"
 # Snapshot, true or false
 SNAPSHOT="true"
 # Snapshot scheduler, Daily, Weekly, Monthly
