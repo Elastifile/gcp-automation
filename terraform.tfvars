@@ -1,5 +1,5 @@
 # Elastifile image version
-IMAGE = "elastifile-storage-3-1-0-31-ems"
+IMAGE = "elastifile-storage-3-1-0-31-84a4d2dcd099-ems"
 # Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
 # Contact person name - No spaces allowed
@@ -55,3 +55,5 @@ DATA_CONTAINER = "DC01"
 EMS_ONLY = "false"
 #kms - customer managed encryption key
 KMS_KEY = ""
+# image Project
+IMAGE_PROJECT = "elastifile-ci"

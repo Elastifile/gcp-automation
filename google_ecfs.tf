@@ -106,6 +106,9 @@ variable "KMS_KEY" {
   default = ""
 }
 
+variable "IMAGE_PROJECT" {
+  default = "elastifle-public-196717"
+}
 
 provider "google" {
   credentials = "${file("${var.CREDENTIALS}")}"
@@ -135,7 +138,7 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+  image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
   disk_encryption_key{
         kms_key_self_link = "${var.KMS_KEY}"
    }
@@ -146,7 +149,7 @@ resource "google_compute_disk" "ems-boot-disk" {
   name  = "${var.CLUSTER_NAME}"
   zone  = "${var.EMS_ZONE}"
   size  = "100"
-  image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+  image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 }
 
 # -------------------------------------------------
@@ -169,7 +172,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
 
@@ -200,7 +203,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   }
 
   metadata_startup_script = <<SCRIPT
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
@@ -234,7 +237,7 @@ labels = [
 
   boot_disk {
 #    initialize_params {
-#      image = "projects/elastifle-public-196717/global/images/${var.IMAGE}"
+#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
 #    }
      source = "${local.boot_disk}"
   }
@@ -260,7 +263,7 @@ labels = [
   }
 
   metadata_startup_script = <<SCRIPT
-  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=elastifle-public-196717\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
+  bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
