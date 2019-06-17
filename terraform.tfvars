@@ -36,7 +36,7 @@ SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.co
 # true false
 USE_PUBLIC_IP = true
 # deployment type - single, dual, multizone
-DEPLOYMENT_TYPE = "dual"
+DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-d
 NODES_ZONES = "us-central1-f"
 # setup complete - false for initial deployment, true for add/remove nodes
