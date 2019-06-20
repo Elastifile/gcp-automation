@@ -54,6 +54,6 @@ DATA_CONTAINER = "DC01"
 #create EMS only
 EMS_ONLY = "false"
 #kms - customer managed encryption key
-KMS_KEY = ""
+KMS_KEY = "projects/canary-performance/locations/global/keyRings/test/cryptoKeys/quickstart"
 # image Project
 IMAGE_PROJECT = "elastifle-public-196717"
