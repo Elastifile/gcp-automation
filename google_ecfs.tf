@@ -303,7 +303,8 @@ google_lb_vip = element(
 concat(google_compute_address.google-ilb-static-vip.*.address, [""]),
 0,
 )
-lb_vip = var.LB_TYPE == "google" ? local.google_lb_vip : var.LB_VIP
+#lb_vip = var.LB_TYPE == "google" ? local.google_lb_vip : var.LB_VIP
+lb_vip = var.LB_VIP
 encrypted_boot_disk = element(
 concat(
 google_compute_disk.ems-encrypted-boot-disk.*.self_link,
