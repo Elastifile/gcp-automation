@@ -171,11 +171,6 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   zone         = var.EMS_ZONE
 
   tags = ["https-server"]
-  #labels = [
-  #{
-  #    "cluster-hash" = var.CLUSTER_NAME
-  #  },
-  #]
   labels = {
     cluster-hash = var.CLUSTER_NAME
   }
@@ -240,12 +235,6 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
   labels = {
     cluster-hash = var.CLUSTER_NAME
   }
-
-#  labels = [
-#    {
-#      "cluster-hash" = var.CLUSTER_NAME
-#    },
-#  ]
 
   boot_disk {
     #    initialize_params {
