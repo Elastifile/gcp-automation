@@ -19,7 +19,7 @@ DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
 LB_TYPE = "elastifile"
 # instance prefix
-CLUSTER_NAME = "elastifile-guyr"
+CLUSTER_NAME = "elastifile-guyr-v12"
 # GCP region
 REGION = "us-central1"
 # GCP zone
