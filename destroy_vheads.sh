@@ -47,7 +47,7 @@ done
 
 
  #delete the VPC network
- DEFAULTROUTES=`gcloud compute routes list | grep $CLUSTER_NAME | cut -d " " -f 1`
+ DEFAULTROUTES=`gcloud compute routes list --filter="name: elfs-route-$CLUSTER_NAME" |cut -d " " -f 1 |awk 'NR>1'| cut -d " " -f 1`
  for i in $DEFAULTROUTES; do
    gcloud compute routes delete $i --quiet
 done
