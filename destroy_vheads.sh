@@ -14,7 +14,7 @@ E_O_F
 
 # set -x
 
-while getopts "h?:c:a:" opt; do
+while getopts "h?:c:a:b:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -23,6 +23,8 @@ while getopts "h?:c:a:" opt; do
     c)  CLUSTER_NAME=${OPTARG}
         ;;
     a)  AVAILABILITY_ZONES=${OPTARG}
+        ;;
+    b)  EMS_ZONE=${OPTARG}
         ;;
     esac
 done
