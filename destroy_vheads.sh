@@ -6,6 +6,8 @@ usage() {
 Usage:
   -c cluster name
   -a availability zones
+  -b ems zone
+
 E_O_F
   exit 1
 }
@@ -27,7 +29,7 @@ done
 
 #delete the vheads
 # remove ems delete protection
-gcloud compute instances update $CLUSTER_NAME --no-deletion-protection --quiet &
+gcloud compute instances update $CLUSTER_NAME --zone=$EMS_ZONE --no-deletion-protection --quiet &
 sleep 5
 VHEAD_NAME="$CLUSTER_NAME-elfs"
 RA_NAME="$CLUSTER_NAME-ra"
@@ -36,11 +38,14 @@ for zone in ${AVAILABILITY_ZONES//,/ }; do
   RALIST=`gcloud compute instances list --filter="name:$RA_NAME AND ZONE:$zone" | grep $RA_NAME | cut -d " " -f 1`
     for i in $VMLIST; do
       # remove vhead delete protection
-      gcloud compute instances update $i --no-deletion-protection --quiet &
+      gcloud compute instances update $i --zone=$zone --no-deletion-protection --quiet &
       sleep 5
       gcloud compute instances delete $i --zone=$zone --quiet &
     done
     for i in $RALIST; do
+      # remove ra delete protection
+      gcloud compute instances update $i --zone=$zone --no-deletion-protection --quiet &
+      sleep 5
       gcloud compute instances delete $i --zone=$zone --quiet &
     done
 done
