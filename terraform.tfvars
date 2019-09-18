@@ -28,7 +28,7 @@ EMS_ZONE = "us-central1-f"
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork
 SUBNETWORK = "elastifile-subnet"
-# GCP project network
+# GCP project network - use full path if using SVPC and Google iLB
 NETWORK = "elastifile-network"
 # GCP service account credential filename
 CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
