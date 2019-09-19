@@ -76,7 +76,7 @@ function update_vheads {
         done
         ADDED_IPS=$(echo $ADDED_IPS | sed s'/[,]//')
         echo "ADDED_IPS: ${ADDED_IPS}" | tee ${LOG}    
-        ./update_google_ilb.sh -a $ADDED_IPS -e $SERVICE_EMAIL -p $PROJECT -r $CLUSTER_NAME
+        ./update_google_ilb.sh -a $ADDED_IPS -e $SERVICE_EMAIL -p $PROJECT
       fi
   else
     let NUM=${PRE_NUM_OF_VMS}-${NUM_OF_VMS}
