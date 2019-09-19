@@ -39,22 +39,33 @@ Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS 
 
 
 ## Service Account requirements:
+
 For the host SharedVPC project you will need to give the service account the following roles:
 
 roles/compute.networkUser
+
 roles/compute.networkAdmin
+
 roles/compute.securityAdmin
 
 For the service project where instances are deployed the service account will need:
 
 roles/compute.instanceAdmin
+
 roles/compute.instanceAdmin.v1
+
 roles/compute.imageUser
+
 roles/iam.serviceAccountUser
+
 roles/iam.serviceAccountTokenCreator
+
 roles/compute.networkUser
+
 roles/compute.networkAdmin
+
 roles/compute.securityAdmin
+
 
 ## Components:
 
