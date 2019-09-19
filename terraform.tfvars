@@ -26,9 +26,9 @@ REGION = "us-central1"
 EMS_ZONE = "us-central1-f"
 # GCP project
 PROJECT = "booming-mission-107807"
-# GCP project subnetwork
+# GCP project subnetwork - use full path when deploying in a SVPC env
 SUBNETWORK = "elastifile-subnet"
-# GCP project network - use full path if using SVPC and Google iLB
+# GCP project network - use full path when deploying in a SVPC and Google iLB env
 NETWORK = "elastifile-network"
 # GCP service account credential filename
 CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
