@@ -4,6 +4,7 @@ Terraform to create, configure and deploy a Elastifile Cloud Filesystem (ECFS) c
 
 ## Note:
 Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS can be successfully deployed in GCE before using this.
+Supports Terraform V11 only, for V12 use branch _tf_v12.
 
 ## Use:
 1. Create password.txt file with a password to use for eManage  (.gitignore skips this file)
