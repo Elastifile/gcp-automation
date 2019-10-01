@@ -1,5 +1,5 @@
 # Elastifile image version
-IMAGE = "elastifile-storage-3-2-1-15-ems"
+IMAGE = "elastifile-storage-3-2-1-19-ems"
 # Company name - No spaces allowed
 COMPANY_NAME = "elastifile"
 # Contact person name - No spaces allowed
@@ -8,7 +8,7 @@ CONTACT_PERSON_NAME = "Guy_Rinkevich"
 EMAIL_ADDRESS = "guy.rinkevich@elastifile.com"
 # "small" "medium" "medium-plus" "large" "standard" "small standard" "local" "small local" "custom"
 TEMPLATE_TYPE = "large"
-# number of vheads exlusive of EMS
+# number of vheads exclusive of EMS
 NUM_OF_VMS = "3"
 #<cpucores>_<ram> default: 4_42
 VM_CONFIG = "4_60"
