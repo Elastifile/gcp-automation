@@ -1,3 +1,6 @@
+# In order to deploy Elastifile in GCP using Terraform, you will need to fill this registration form and be whitelisted:
+https://docs.google.com/forms/d/138zCexxdEezDYU2K7NjWvE7FA-kut-y2gBOjBuQWndk/viewform?edit_requested=true
+
 # Terraform-Elastifile-GCP
 
 Terraform to create, configure and deploy a Elastifile Cloud Filesystem (ECFS) cluster in Google Compute (GCE)
@@ -112,7 +115,7 @@ Log directory from EMS
 
 ## Known Issues:
 Custom template configurations are not officially supported by Elastifile.
-Shared VPC configuration is partially supported, and will cot configure the Elastifile LB.
+Shared VPC configuration is partially supported, and will not configure the Elastifile LB.
 
 ## This version supports Elastifile Ver 3.x with the following:
 - Single replication for SSD PD device configurations.
