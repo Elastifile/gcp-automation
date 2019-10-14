@@ -56,4 +56,4 @@ EMS_ONLY = "false"
 #kms - customer managed encryption key
 KMS_KEY = ""
 # image Project
-IMAGE_PROJECT = "elastifle-public-196717"
+IMAGE_PROJECT = "elastifile-ci"
