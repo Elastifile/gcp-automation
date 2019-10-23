@@ -31,7 +31,7 @@ variable "CONTACT_PERSON_NAME" {}
 variable "EMAIL_ADDRESS" {}
 
 variable "IMAGE" {
-  default = "elastifile-storage-3-2-1-19-ems"	
+  default = "elastifile-storage-3-2-1-19-ems"
 }
 
 variable "SETUP_COMPLETE" {
@@ -118,17 +118,17 @@ provider "google" {
   region      = "${var.REGION}"
 }
 
-
 #----------------------------------------------------------------------------------------------------
 #   Acquire a static internal address for the google ILB that will serve the Elastifile NFS exports.
 #----------------------------------------------------------------------------------------------------
 
 resource "google_compute_address" "google-ilb-static-vip" {
-  count = "${var.LB_TYPE == "google" ? 1 : 0}"
+  count        = "${var.LB_TYPE == "google" ? 1 : 0}"
   name         = "google-ilb-static-vip-${var.CLUSTER_NAME}"
   address_type = "INTERNAL"
+
   #subnetwork   = "https://www.googleapis.com/compute/v1/projects/${var.PROJECT}/regions/${var.REGION}/subnetworks/${var.SUBNETWORK}"
-  subnetwork   = "${var.SUBNETWORK}"
+  subnetwork = "${var.SUBNETWORK}"
 }
 
 # -------------------------------------------------
@@ -141,9 +141,10 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   zone  = "${var.EMS_ZONE}"
   size  = "100"
   image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
-  disk_encryption_key{
-        kms_key_self_link = "${var.KMS_KEY}"
-   }
+
+  disk_encryption_key {
+    kms_key_self_link = "${var.KMS_KEY}"
+  }
 }
 
 resource "google_compute_disk" "ems-boot-disk" {
@@ -167,17 +168,16 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   tags = ["https-server"]
 
   labels = [
-	{
-        "cluster-hash"="${var.CLUSTER_NAME}"
-	}
+    {
+      "cluster-hash" = "${var.CLUSTER_NAME}"
+    },
   ]
 
   boot_disk {
-#    initialize_params {
-#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
-#    }
-     source = "${local.boot_disk}"
-
+    #    initialize_params {
+    #      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
+    #    }
+    source = "${local.boot_disk}"
   }
 
   network_interface {
@@ -231,17 +231,17 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
 
   tags = ["https-server"]
 
-labels = [
-        {
-        "cluster-hash"="${var.CLUSTER_NAME}"
-        }
+  labels = [
+    {
+      "cluster-hash" = "${var.CLUSTER_NAME}"
+    },
   ]
 
   boot_disk {
-#    initialize_params {
-#      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
-#    }
-     source = "${local.boot_disk}"
+    #    initialize_params {
+    #      image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
+    #    }
+    source = "${local.boot_disk}"
   }
 
   network_interface {
@@ -284,20 +284,21 @@ SCRIPT
 }
 
 locals {
-  public_ip = "${element(concat(google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.access_config.0.nat_ip, list("")), 0)}"
-  private_ip = "${element(concat(google_compute_instance.Elastifile-EMS-Private.*.network_interface.0.network_ip , list("")), 0)}"
-  ems_address = "${var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
-  google_lb_vip = "${element(concat(google_compute_address.google-ilb-static-vip.*.address, list("")), 0)}"
-  lb_vip = "${var.LB_TYPE == "google" ? local.google_lb_vip : var.LB_VIP}"
-  encrypted_boot_disk = "${element(concat(google_compute_disk.ems-encrypted-boot-disk.*.self_link, list("")), 0)}"
+  public_ip               = "${element(concat(google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.access_config.0.nat_ip, list("")), 0)}"
+  private_ip              = "${element(concat(google_compute_instance.Elastifile-EMS-Private.*.network_interface.0.network_ip , list("")), 0)}"
+  ems_address             = "${var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
+  google_lb_vip           = "${element(concat(google_compute_address.google-ilb-static-vip.*.address, list("")), 0)}"
+  lb_vip                  = "${var.LB_TYPE == "google" ? local.google_lb_vip : var.LB_VIP}"
+  encrypted_boot_disk     = "${element(concat(google_compute_disk.ems-encrypted-boot-disk.*.self_link, list("")), 0)}"
   non_encrypted_boot_disk = "${element(concat(google_compute_disk.ems-boot-disk.*.self_link, list("")), 0)}"
-  boot_disk = "${var.KMS_KEY == "" ? local.non_encrypted_boot_disk : local.encrypted_boot_disk}"
+  boot_disk               = "${var.KMS_KEY == "" ? local.non_encrypted_boot_disk : local.encrypted_boot_disk}"
 }
 
 resource "null_resource" "cluster" {
   count = "${var.EMS_ONLY == "false" ? 1 : 0}"
+
   provisioner "local-exec" {
-     command     = "${path.module}/create_vheads.sh -c '${var.TEMPLATE_TYPE}' -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${local.lb_vip} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
+    command     = "${path.module}/create_vheads.sh -c '${var.TEMPLATE_TYPE}' -l ${var.LB_TYPE} -t ${var.DISK_TYPE} -n ${var.NUM_OF_VMS} -d ${var.DISK_CONFIG} -v ${var.VM_CONFIG} -p ${local.ems_address} -s ${var.DEPLOYMENT_TYPE} -a ${var.NODES_ZONES} -e ${var.COMPANY_NAME} -f ${var.CONTACT_PERSON_NAME} -g ${var.EMAIL_ADDRESS} -i ${var.ILM} -k ${var.ASYNC_DR} -j ${local.lb_vip} -b ${var.DATA_CONTAINER} -r ${var.CLUSTER_NAME}"
     interpreter = ["/bin/bash", "-c"]
   }
 
@@ -312,7 +313,7 @@ resource "null_resource" "cluster" {
 
 resource "null_resource" "google_ilb" {
   count = "${var.LB_TYPE == "google" && var.EMS_ONLY == "false" ? 1 : 0}"
-  
+
   provisioner "local-exec" {
     command     = "${path.module}/create_google_ilb.sh -n ${var.NETWORK} -s ${var.SUBNETWORK} -z ${var.EMS_ZONE} -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -e ${var.SERVICE_EMAIL} -p ${var.PROJECT} -v ${local.lb_vip}"
     interpreter = ["/bin/bash", "-c"]
