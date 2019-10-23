@@ -68,6 +68,10 @@ variable "CREDENTIALS" {}
 
 variable "SERVICE_EMAIL" {}
 
+variable "CREATE_PUBLIC_IP" {
+  default = true
+}
+
 variable "USE_PUBLIC_IP" {
   default = true
 }
@@ -160,7 +164,7 @@ resource "google_compute_disk" "ems-boot-disk" {
 # -------------------------------------------------
 
 resource "google_compute_instance" "Elastifile-EMS-Public" {
-  count        = "${var.USE_PUBLIC_IP}"
+  count        = "${var.CREATE_PUBLIC_IP ? 1 : 0}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
@@ -224,7 +228,7 @@ SCRIPT
 }
 
 resource "google_compute_instance" "Elastifile-EMS-Private" {
-  count        = "${1 - var.USE_PUBLIC_IP}"
+  count        = "${var.CREATE_PUBLIC_IP ? 0 : 1}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
@@ -285,8 +289,8 @@ SCRIPT
 
 locals {
   public_ip               = "${element(concat(google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.access_config.0.nat_ip, list("")), 0)}"
-  private_ip              = "${element(concat(google_compute_instance.Elastifile-EMS-Private.*.network_interface.0.network_ip , list("")), 0)}"
-  ems_address             = "${var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
+  private_ip              = "${element(concat(google_compute_instance.Elastifile-EMS-Private.*.network_interface.0.network_ip, google_compute_instance.Elastifile-EMS-Public.*.network_interface.0.network_ip), 0)}"
+  ems_address             = "${var.CREATE_PUBLIC_IP && var.USE_PUBLIC_IP ? local.public_ip : local.private_ip}"
   google_lb_vip           = "${element(concat(google_compute_address.google-ilb-static-vip.*.address, list("")), 0)}"
   lb_vip                  = "${var.LB_TYPE == "google" ? local.google_lb_vip : var.LB_VIP}"
   encrypted_boot_disk     = "${element(concat(google_compute_disk.ems-encrypted-boot-disk.*.self_link, list("")), 0)}"
