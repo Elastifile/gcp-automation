@@ -31,7 +31,10 @@ NETWORK = "elastifile-network"
 # GCP service account credential filename
 CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
 SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.com"
-# true false
+# Whether to create an EMS with a public IP address. true/false
+CREATE_PUBLIC_IP = true
+# Whether to access the EMS (from the machine running terraform) via public or
+# private IP. Only relevant when CREATE_PUBLIC_IP is true. true/false
 USE_PUBLIC_IP = true
 # deployment type - single, dual, multizone
 DEPLOYMENT_TYPE = "single"
