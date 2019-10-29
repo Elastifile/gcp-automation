@@ -207,8 +207,8 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   metadata_startup_script = <<SCRIPT
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo order_number=GCP-Launcher >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo start_date=18.03.2018 >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo expiration_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo raw_capacity=320T >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo hosts=32 >> /elastifile/emanage/lic/license.gcp.lic
@@ -266,11 +266,11 @@ labels = [
     enable-oslogin      = "false"
   }
 
-   metadata_startup_script = <<SCRIPT
+  metadata_startup_script = <<SCRIPT
   bash -c sudo\ sed\ -i\ \'/image_project=Elastifile-CI/c\\image_project=${var.IMAGE_PROJECT}\'\ /elastifile/emanage/deployment/cloud/init_cloud_google.sh
   sudo echo type=subscription >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo order_number=GCP-Launcher >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo start_date=18.03.2018 >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo expiration_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo raw_capacity=320T >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo hosts=32 >> /elastifile/emanage/lic/license.gcp.lic
