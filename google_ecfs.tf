@@ -31,7 +31,7 @@ variable "CONTACT_PERSON_NAME" {}
 variable "EMAIL_ADDRESS" {}
 
 variable "IMAGE" {
-  default = "elastifile-storage-3-2-1-19-ems"	
+  default = "elastifile-storage-3-2-1-20-ems"	
 }
 
 variable "SETUP_COMPLETE" {
