@@ -210,10 +210,12 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
   sudo echo order_number=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo start_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo expiration_date=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo raw_capacity=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo hosts=unlimited >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo raw_capacity=320T >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo hosts=32 >> /elastifile/emanage/lic/license.gcp.lic
   sudo echo customer_id=unlimited >> /elastifile/emanage/lic/license.gcp.lic
-  sudo echo signature=sO9+j5Q/OPBaB+bMViAITGvN6by8vOYUrxNsOBYWZ4yBNqHj02iqpmqk2oxO XI3voLGhg6f0WW2MStEwxv46ia2iOjMZVCi/ekDL4nioYG3L5Sfzs/NMLI+D vlC36rkOfAkMrjkN9z1bRFNYwHCnXf58TC/W7RM6gimzRqpIz14= >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo signature=qcTHRt/gDCi5q8U3F3cte9iwRqY0EBi/7yoGNQ7d3CaSWtOuMoYSz4wYQ8tO >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo YLFdyXCyPQlFPSBIDzpVzo0UitJwzCIazf2ylTNDVZwXi+GchYvNn1znsrM/ >> /elastifile/emanage/lic/license.gcp.lic
+  sudo echo gvcNeIC4aTBzdQ7aFFr7ZnVHlAs26OzDKeCF7Q9fsaVaBcljCi4= >> /elastifile/emanage/lic/license.gcp.lic
 SCRIPT
 
   # specify the GCP project service account to use
