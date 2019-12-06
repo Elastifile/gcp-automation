@@ -116,7 +116,6 @@ Log directory from EMS
 
 ## Known Issues:
 Custom template configurations are not officially supported by Elastifile.
-Shared VPC configuration is partially supported, and will not configure the Elastifile LB.
 
 ## This version supports Elastifile Ver 3.x with the following:
 - Single replication for SSD PD device configurations.
