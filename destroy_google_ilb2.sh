@@ -13,6 +13,7 @@ Usage:
   -a availability zones
   -e service email
   -p project
+  -q host_project
 E_O_F
   exit 1
 }
@@ -20,7 +21,7 @@ E_O_F
 #variables
 LOG="destroy_google_ilb.log"
 
-while getopts "h?:z:n:s:c:a:e:p:" opt; do
+while getopts "h?:z:n:s:c:a:e:p:q:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -40,6 +41,8 @@ while getopts "h?:z:n:s:c:a:e:p:" opt; do
         ;;
     p)  PROJECT=${OPTARG}
         ;;
+    q)  HOST_PROJECT=${OPTARG}
+        ;;
     esac
 done
 
@@ -57,10 +60,10 @@ echo "CLUSTER_NAME: $CLUSTER_NAME" | tee -a ${LOG}
 # Destroy Google Internal Load Balancer
 function destroy_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-health-tcp-check --quiet --account=$SERVICE_EMAIL --project=$PROJECT
-    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-health-udp-check --quiet --account=$SERVICE_EMAIL --project=$PROJECT
-    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-tcp-internal-lb --quiet --account=$SERVICE_EMAIL --project=$PROJECT
-    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-udp-internal-lb --quiet --account=$SERVICE_EMAIL --project=$PROJECT
+    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-health-tcp-check --quiet --account=$SERVICE_EMAIL --project=$HOST_PROJECT
+    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-health-udp-check --quiet --account=$SERVICE_EMAIL --project=$HOST_PROJECT
+    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-tcp-internal-lb --quiet --account=$SERVICE_EMAIL --project=$HOST_PROJECT
+    gcloud compute firewall-rules delete $CLUSTER_NAME-allow-udp-internal-lb --quiet --account=$SERVICE_EMAIL --project=$HOST_PROJECT
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     gcloud compute forwarding-rules delete $CLUSTER_NAME-int-lb-tcp-forwarding-rule --region $REGION --quiet --account=$SERVICE_EMAIL --project=$PROJECT
     gcloud compute forwarding-rules delete $CLUSTER_NAME-int-lb-udp-forwarding-rule --region $REGION --quiet --account=$SERVICE_EMAIL --project=$PROJECT
