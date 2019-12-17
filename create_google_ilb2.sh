@@ -73,7 +73,7 @@ function create_google_ilb {
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo "Creating backend services"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    gcloud compute backend-services create $CLUSTER_NAME-int-tcp-lb --load-balancing-scheme internal --protocol tcp --region $REGION --health-checks $CLUSTER_NAME-tcp-health-check
+    gcloud compute backend-services create $CLUSTER_NAME-int-tcp-lb --load-balancing-scheme internal --protocol tcp --region $REGION --health-checks $CLUSTER_NAME-tcp-health-check --session-affinity CLIENT_IP
     gcloud compute backend-services create $CLUSTER_NAME-int-udp-lb --load-balancing-scheme internal --protocol udp --region $REGION --health-checks $CLUSTER_NAME-tcp-health-check
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo "Adding int-lb tag to all cluster instances"
