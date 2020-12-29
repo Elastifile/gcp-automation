@@ -309,7 +309,7 @@ resource "null_resource" "cluster" {
 
   provisioner "local-exec" {
     when        = "destroy"
-    command     = "${path.module}/destroy_vheads.sh -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -b ${var.EMS_ZONE}"
+    command     = "${path.module}/destroy_vheads.sh -c ${var.CLUSTER_NAME} -a ${var.NODES_ZONES} -b ${var.EMS_ZONE} -p ${var.PROJECT}"
     interpreter = ["/bin/bash", "-c"]
   }
 }

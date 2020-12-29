@@ -7,14 +7,14 @@ Usage:
   -c cluster name
   -a availability zones
   -b ems zone
-
+  -p project name
 E_O_F
   exit 1
 }
 
 # set -x
 
-while getopts "h?:c:a:b:" opt; do
+while getopts "h?:c:a:b:p:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -26,30 +26,23 @@ while getopts "h?:c:a:b:" opt; do
         ;;
     b)  EMS_ZONE=${OPTARG}
         ;;
+    p)  PROJECT=${OPTARG}
+        ;;
     esac
 done
 
 #delete the vheads
 # remove ems delete protection
-gcloud compute instances update $CLUSTER_NAME --zone=$EMS_ZONE --no-deletion-protection --quiet &
+gcloud compute instances update $CLUSTER_NAME --zone=$EMS_ZONE --project $PROJECT --no-deletion-protection --quiet &
 sleep 5
 VHEAD_NAME="$CLUSTER_NAME-elfs"
 RA_NAME="$CLUSTER_NAME-ra"
 for zone in ${AVAILABILITY_ZONES//,/ }; do
-  VMLIST=`gcloud compute instances list --filter="name:$VHEAD_NAME AND ZONE:$zone" | grep $VHEAD_NAME | cut -d " " -f 1`
-  RALIST=`gcloud compute instances list --filter="name:$RA_NAME AND ZONE:$zone" | grep $RA_NAME | cut -d " " -f 1`
-    for i in $VMLIST; do
-      # remove vhead delete protection
-      gcloud compute instances update $i --zone=$zone --no-deletion-protection --quiet &
-      sleep 5
-      gcloud compute instances delete $i --zone=$zone --quiet &
-    done
-    for i in $RALIST; do
-      # remove ra delete protection
-      gcloud compute instances update $i --zone=$zone --no-deletion-protection --quiet &
-      sleep 5
-      gcloud compute instances delete $i --zone=$zone --quiet &
-    done
+  VMLIST=`gcloud compute instances list --project $PROJECT --filter="name ~ ${VHEAD_NAME}* AND zone:$zone" | grep $VHEAD_NAME | cut -d " " -f 1`
+  RALIST=`gcloud compute instances list --project $PROJECT --filter="name ~ ${RA_NAME}* AND zone:$zone" | grep $RA_NAME | cut -d " " -f 1`
+  for i in $VMLIST $RALIST; do
+    (gcloud compute instances update $i --project $PROJECT --zone=$zone --no-deletion-protection --quiet; gcloud compute instances delete $i --project $PROJECT --zone=$zone --quiet) &
+  done
 done
 
 
