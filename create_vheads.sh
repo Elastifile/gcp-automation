@@ -148,10 +148,10 @@ function establish_session {
 function first_run {
   #loop function to wait for EMS to complete loading after instance creation
   while true; do
-    emsresponse=`curl -k -s -D ${SESSION_FILE} -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions | grep created_at | cut -d , -f 8 | cut -d \" -f 2`
+    curl -k -s -D ${SESSION_FILE} -m 5 -H "Content-Type: application/json" -X POST -d '{"user": {"login":"admin","password":"changeme"}}' https://$EMS_ADDRESS/api/sessions
+    emsresponse=`curl -k -s -b ${SESSION_FILE} -m 5 -H "Content-Type: application/json" -X GET https://$EMS_ADDRESS/api/cloud_providers/is_ready | grep true`
     echo -e "Waiting for EMS init...\n" | tee -a ${LOG}
-    if [[ $emsresponse == "created_at" ]]; then
-      sleep 30
+    if [[ -n "$emsresponse" ]]; then
       echo -e "EMS now ready!\n" | tee -a ${LOG}
       break
     fi
