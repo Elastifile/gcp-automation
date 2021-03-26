@@ -31,7 +31,10 @@ while getopts "h?:c:a:b:p:" opt; do
     esac
 done
 
-#delete the vheads
+# find the host project
+HOSTPROJECT=`gcloud compute instances describe --zone=$EMS_ZONE $CLUSTER_NAME | grep subnetwork | awk -F/ '{print $7}'`
+
+# delete the vheads
 # remove ems delete protection
 gcloud compute instances update $CLUSTER_NAME --zone=$EMS_ZONE --project $PROJECT --no-deletion-protection --quiet &
 sleep 5
@@ -45,11 +48,10 @@ for zone in ${AVAILABILITY_ZONES//,/ }; do
   done
 done
 
-
- #delete the VPC network
- DEFAULTROUTES=`gcloud compute routes list --filter="name: elfs-route-$CLUSTER_NAME" |cut -d " " -f 1 |awk 'NR>1'| cut -d " " -f 1`
+# delete the VPC routes
+DEFAULTROUTES=`gcloud compute routes list --project $HOSTPROJECT --filter="name: elfs-route-$CLUSTER_NAME" | cut -d " " -f 1 | awk 'NR>1'| cut -d " " -f 1`
  for i in $DEFAULTROUTES; do
-   gcloud compute routes delete $i --quiet
+   gcloud compute routes delete --project $HOSTPROJECT $i --quiet
 done
 
 exit 0
