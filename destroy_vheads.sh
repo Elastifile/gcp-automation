@@ -40,10 +40,13 @@ gcloud compute instances update $CLUSTER_NAME --zone=$EMS_ZONE --project $PROJEC
 sleep 5
 VHEAD_NAME="$CLUSTER_NAME-elfs"
 RA_NAME="$CLUSTER_NAME-ra"
+EMS_NAME="$CLUSTER_NAME"
+
 for zone in ${AVAILABILITY_ZONES//,/ }; do
   VMLIST=`gcloud compute instances list --project $PROJECT --filter="name ~ ${VHEAD_NAME}* AND zone:$zone" | grep $VHEAD_NAME | cut -d " " -f 1`
   RALIST=`gcloud compute instances list --project $PROJECT --filter="name ~ ${RA_NAME}* AND zone:$zone" | grep $RA_NAME | cut -d " " -f 1`
-  for i in $VMLIST $RALIST; do
+  EMSLIST=`gcloud compute instances list --filter="name:$EMS_NAME AND ZONE:$zone" | grep -E "\b$EMS_NAME(\s|$)" | cut -d " " -f 1`
+  for i in $EMSLIST $VMLIST $RALIST; do
     (gcloud compute instances update $i --project $PROJECT --zone=$zone --no-deletion-protection --quiet; gcloud compute instances delete $i --project $PROJECT --zone=$zone --quiet) &
   done
 done
