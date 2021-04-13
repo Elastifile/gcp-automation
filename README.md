@@ -7,7 +7,9 @@ Terraform to create, configure and deploy a Elastifile Cloud Filesystem (ECFS) c
 
 ## Note:
 Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS can be successfully deployed in GCE before using this.
-Supports Terraform V11 only, for V12 use branch _tf_v12.
+Supports both Terraform v11 and Terraform v12 only.
+For Terraform v12.14 or above (still 12.x), you might see warnings that can be ignored and don't impact the deployment.
+Those warnings are not fixed as they will break the support of v11 (the common used version for thos job).
 A Delete Protection option was added to the ECFS instanes - the Terraform Destroy will be able to delete the instance only if the Terraform is running from an instance that have a gcloud environment configured to the correct project and service account. otherwise, the ECFS instances will not be deleted.
 
 ## Use:
@@ -24,6 +26,7 @@ A Delete Protection option was added to the ECFS instanes - the Terraform Destro
 - VM_CONFIG = [cpu cores per vm]_[ram per vm] example "20_128" will create 20 CPU, 128GB RAM VMs. Default: "4_42" Only applies to custom templates
 - CLUSTER_NAME = Name for ECFS service, no longer than
 - EMS_ZONE = EMS Zone
+- EMS_DISK_TYPE = pd-standard/pd-ssd
 - PROJECT = Project name
 - SUBNETWORK = Subnetwork to use. default or full path to use specific/custom project or shared vpc subnetwork eg projects/support-team-172804/regions/us-west1/subnetworks/andrew-shared-vpc-network-subnet
 - IMAGE = EMS image name
@@ -140,17 +143,6 @@ Custom template configurations are not officially supported by Elastifile.
   - none, is used when you don't have enough credentials to configure the LB at the moment, and you will perform it after deployemnt. if you plan to configure the LB later on, use the following:
         - LB_VIP: auto or a static IP address from outside the subnet.
 - There is an otption to use encrypted customer managed key for the EMS boot disk.
-
-
-## This version supports Elastifile Ver 2.7.x with the following:
-- Dual replication for all configurations
-- Adding nodes from a live cluster, by changing the SETUP_COMPLETE to true, and modifing the NUM_OF_VMS to the requested number. 
-*** Removing nodes is not supported for version 2.7.5.x ***
-- deploying with google iLB, with dynamic support to add/remove nodes.
-- deploying with elastifile LB,  with dynamic support to add/remove nodes.
-- Public IP, true/flase support.
-- Custom configuration of the cluster.
-- Full Destroy
 
 
 Small Local and Small Standard are not supported...
