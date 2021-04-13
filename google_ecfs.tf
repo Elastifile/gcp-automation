@@ -172,11 +172,9 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
 
   tags = ["https-server"]
 
-  labels = [
-	{
+  labels = {
         "cluster-hash"="${var.CLUSTER_NAME}"
 	}
-  ]
 
   boot_disk {
 #    initialize_params {
@@ -196,7 +194,7 @@ resource "google_compute_instance" "Elastifile-EMS-Public" {
     }
   }
 
-  metadata {
+  metadata = {
     ecfs_ems            = "true"
     reference_name      = "${var.CLUSTER_NAME}"
     version             = "${var.IMAGE}"
@@ -239,11 +237,9 @@ resource "google_compute_instance" "Elastifile-EMS-Private" {
 
   tags = ["https-server"]
 
-labels = [
-        {
+labels = {
         "cluster-hash"="${var.CLUSTER_NAME}"
         }
-  ]
 
   boot_disk {
 #    initialize_params {
@@ -258,7 +254,7 @@ labels = [
     subnetwork = "${var.SUBNETWORK}"
   }
 
-  metadata {
+  metadata = {
     ecfs_ems            = "true"
     reference_name      = "${var.CLUSTER_NAME}"
     version             = "${var.IMAGE}"
@@ -340,7 +336,7 @@ resource "null_resource" "google_ilb" {
 resource "null_resource" "update_cluster" {
   count = "${var.SETUP_COMPLETE == "true" ? 1 : 0}"
 
-  triggers {
+  triggers = {
     num_of_vms = "${var.NUM_OF_VMS}"
   }
 
