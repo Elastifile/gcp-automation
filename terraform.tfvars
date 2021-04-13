@@ -16,12 +16,14 @@ DISK_TYPE = "persistent"
 DISK_CONFIG = "4_1000"
 # Load Balance mode - "none" "dns" "elastifile" "google"
 LB_TYPE = "elastifile"
-# instance prefix
+# instance prefix. A limitation of 38 characters
 CLUSTER_NAME = "elastifile-guyr"
 # GCP region
 REGION = "us-central1"
 # GCP zone
 EMS_ZONE = "us-central1-f"
+# EMS Disk Type = "pd-standard", "pd-ssd"
+EMS_DISK_TYPE = "pd-standard"
 # GCP project
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork - use full path when deploying in a SVPC env
@@ -32,7 +34,7 @@ NETWORK = "elastifile-network"
 CREDENTIALS = "booming-mission-107807-0e99db2e1ce2.json"
 SERVICE_EMAIL = "cloud-performance@booming-mission-107807.iam.gserviceaccount.com"
 # true false
-USE_PUBLIC_IP = true
+USE_PUBLIC_IP = "true"
 # deployment type - single, dual, multizone
 DEPLOYMENT_TYPE = "single"
 # availability zones for multizone selection, for example:  us-central1-f,us-central1-c,us-central1-b

@@ -31,7 +31,7 @@ variable "CONTACT_PERSON_NAME" {}
 variable "EMAIL_ADDRESS" {}
 
 variable "IMAGE" {
-  default = "elastifile-storage-3-2-1-51-ems"	
+  default = "elastifile-storage-3-2-1-51-ems"
 }
 
 variable "SETUP_COMPLETE" {
@@ -54,6 +54,10 @@ variable "EMS_ZONE" {
   default = "us-central1-a"
 }
 
+variable "EMS_DISK_TYPE" {
+  default = "pd-standard"
+}
+
 variable "NETWORK" {
   default = "default"
 }
@@ -69,7 +73,7 @@ variable "CREDENTIALS" {}
 variable "SERVICE_EMAIL" {}
 
 variable "USE_PUBLIC_IP" {
-  default = true
+  default = "true"
 }
 
 variable "ILM" {
@@ -109,7 +113,7 @@ variable "KMS_KEY" {
 }
 
 variable "IMAGE_PROJECT" {
-  default = "elastifle-public-196717"
+  default = "elastifile-ci"
 }
 
 provider "google" {
@@ -141,6 +145,7 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   zone  = "${var.EMS_ZONE}"
   size  = "100"
   image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
+  type = "${var.EMS_DISK_TYPE}"
   disk_encryption_key{
         kms_key_self_link = "${var.KMS_KEY}"
    }
@@ -152,6 +157,7 @@ resource "google_compute_disk" "ems-boot-disk" {
   zone  = "${var.EMS_ZONE}"
   size  = "100"
   image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
+  type = "${var.EMS_DISK_TYPE}"
 }
 
 # -------------------------------------------------
@@ -159,7 +165,7 @@ resource "google_compute_disk" "ems-boot-disk" {
 # -------------------------------------------------
 
 resource "google_compute_instance" "Elastifile-EMS-Public" {
-  count        = "${var.USE_PUBLIC_IP}"
+  count        = "${var.USE_PUBLIC_IP == "true" ? 1 : 0}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
@@ -226,7 +232,7 @@ SCRIPT
 }
 
 resource "google_compute_instance" "Elastifile-EMS-Private" {
-  count        = "${1 - var.USE_PUBLIC_IP}"
+  count        = "${var.USE_PUBLIC_IP == "false" ? 1 : 0}"
   name         = "${var.CLUSTER_NAME}"
   machine_type = "n1-standard-8"
   zone         = "${var.EMS_ZONE}"
