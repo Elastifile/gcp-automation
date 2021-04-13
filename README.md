@@ -9,7 +9,7 @@ Terraform to create, configure and deploy a Elastifile Cloud Filesystem (ECFS) c
 Follow the Elastifile Cloud Deployment GCP Installation Guide to make sure ECFS can be successfully deployed in GCE before using this.
 Supports both Terraform v11 and Terraform v12 only.
 For Terraform v12.14 or above (still 12.x), you might see warnings that can be ignored and don't impact the deployment.
-Those warnings are not fixed as they will break the support of v11 (the common used version for thos job).
+Those warnings are not fixed as they will break the support of v11 (the common used version for this job).
 A Delete Protection option was added to the ECFS instanes - the Terraform Destroy will be able to delete the instance only if the Terraform is running from an instance that have a gcloud environment configured to the correct project and service account. otherwise, the ECFS instances will not be deleted.
 
 ## Use:
