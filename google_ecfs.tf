@@ -54,10 +54,6 @@ variable "EMS_ZONE" {
   default = "us-central1-a"
 }
 
-variable "EMS_DISK_TYPE" {
-  default = "pd-standard"
-}
-
 variable "NETWORK" {
   default = "default"
 }
@@ -145,7 +141,7 @@ resource "google_compute_disk" "ems-encrypted-boot-disk" {
   zone  = "${var.EMS_ZONE}"
   size  = "100"
   image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
-  type = "${var.EMS_DISK_TYPE}"
+  type = "pd-ssd"
   disk_encryption_key{
         kms_key_self_link = "${var.KMS_KEY}"
    }
@@ -157,7 +153,7 @@ resource "google_compute_disk" "ems-boot-disk" {
   zone  = "${var.EMS_ZONE}"
   size  = "100"
   image = "projects/${var.IMAGE_PROJECT}/global/images/${var.IMAGE}"
-  type = "${var.EMS_DISK_TYPE}"
+  type = "pd-ssd"
 }
 
 # -------------------------------------------------

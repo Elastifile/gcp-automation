@@ -22,8 +22,6 @@ CLUSTER_NAME = "elastifile-guyr"
 REGION = "us-central1"
 # GCP zone
 EMS_ZONE = "us-central1-f"
-# EMS Disk Type = "pd-standard", "pd-ssd"
-EMS_DISK_TYPE = "pd-standard"
 # GCP project
 PROJECT = "booming-mission-107807"
 # GCP project subnetwork - use full path when deploying in a SVPC env
