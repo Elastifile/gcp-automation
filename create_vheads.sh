@@ -35,6 +35,7 @@ Usage:
   -k async dr
   -j lb vip
   -b data container
+  -z image
 E_O_F
   exit 1
 }
@@ -52,7 +53,7 @@ LOG="create_vheads.log"
 #LOG=/dev/null
 #DISK_SIZE=
 
-while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:r:" opt; do
+while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:r:z:" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -90,10 +91,12 @@ while getopts "h?:c:l:t:n:d:v:p:s:a:e:f:g:i:k:j:b:r:" opt; do
     k)  ASYNC_DR=${OPTARG}
         ;;
     j)  LB_VIP=${OPTARG}
-	;;
+        ;;
     b)  DATA_CONTAINER=${OPTARG}
         ;;
     r)  EMS_NAME=${OPTARG}
+        ;;
+    z)  IMAGE=${OPTARG}
         ;;
     esac
 done
@@ -136,6 +139,7 @@ echo "ILM: $ILM" | tee -a ${LOG}
 echo "ASYNC_DR: $ASYNC_DR" | tee -a ${LOG}
 echo "LB_VIP: $LB_VIP" | tee -a ${LOG}
 echo "DATA_CONTAINER: $DATA_CONTAINER" | tee -a ${LOG}
+echo "IMAGE: $IMAGE" | tee -a ${LOG}
 
 #set -x
 
@@ -281,8 +285,10 @@ function add_capacity {
   else
     create_instances $NUM_OF_VMS
     job_status "create_instances_job"
-    echo "Start cluster deployment\n" | tee -a ${LOG}
-    job_status "activate_emanage_job"
+    if [[ $(echo $IMAGE | sed 's/^\(elastifile-storage\|emanage\)-//g') == 3-2-* ]]; then
+      echo "Start cluster deployment\n" | tee -a ${LOG}
+      job_status "activate_emanage_job"
+    fi
   fi
 }
 
