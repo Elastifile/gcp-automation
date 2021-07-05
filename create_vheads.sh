@@ -215,6 +215,10 @@ function setup_ems {
   if [[ ${DEPLOYMENT_TYPE} == "multizone" ]]; then
     echo -e "Multi Zone.\n" | tee -a ${LOG}
     echo -e "Multi Zone.\n"
+    if [[ $(echo ${AVAILABILITY_ZONES} | awk -v RS="," '{print $1}'| sort | uniq | wc -l) -ne 3 ]]; then
+      echo "Zone list should be 3"
+      exit 1
+    fi
     all_zones=$(curl -k -s -b ${SESSION_FILE} --request GET --url "https://"${EMS_ADDRESS}"/api/availability_zones" | jsonValue name | sed s'/[,]$//')
     echo -e "$all_zones"
     curl -k -b ${SESSION_FILE} -H "Content-Type: application/json" -X PUT -d '{"availability_zone_use":true}' https://${EMS_ADDRESS}/api/cloud_providers/1 >> ${LOG} 2>&1
